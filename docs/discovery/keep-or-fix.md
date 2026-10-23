@@ -1,0 +1,15 @@
+# DayTrader 8: keep-or-fix decisions
+
+Behaviour in the legacy app that is odd, wrong or undocumented. For each: who depends on it, Claude's suggestion, and the decision with its reason. Kept quirks become requirements; fixed ones become requirements for the corrected behaviour. **The decisions are Luke's, at the first gate.**
+
+| ID | Behaviour | Evidence | Who depends on it | Suggestion | Decision |
+|---|---|---|---|---|---|
+| KF-1 | A buy isn't checked against cash, so the balance can go negative | TRADE-3 test | Benchmark workloads (never fail for lack of cash) | **Fix:** reject a buy that costs more than the cash balance. Keep a setting for load tests if NFR-1 needs it | Pending |
+| KF-2 | Registration accepts any opening balance, including negative or non-numeric (non-numeric: untested) | AUTH-4 test | No one | **Fix:** require a positive amount with at most 2 decimal places | Pending |
+| KF-3 | A wrong password is an HTTP 500. The server log records the password tried **and the user's stored password**, in plain text. Passwords and card numbers are stored in plain text | AUTH-3 test; server log checked by hand | No one | **Fix:** a login error on the page (no 500); hash passwords (e.g. Argon2); never log secrets; don't store full card numbers. The migrated data can't be hashed in place, so seeded users get new hashed passwords | Pending |
+| KF-4 | Money mostly uses `BigDecimal` half-up to 2 places, with leaks: quote `change` is a `double` (DOUBLE column); `new BigDecimal(double)` builds some constants; JSON sends money as numbers; quantity is a `double` | Code: `QuoteData`, `TradeConfig`, DDL; QUOTE-1 test | API clients reading the JSON | **Fix inside, keep outside:** `Decimal` everywhere internally; keep the JSON field names and numeric format for API clients, or version the API if strings are chosen | Pending |
+| KF-5 | Selling an already sold holding is an HTTP 500 (the "cancelled" order it tries to save fails validation); no money moves | TRADE-5 test | No one | **Fix:** a clear message on the order page; no 500 | Pending |
+| KF-6 | `web.xml` declares security constraints, but the server enables no application security, so `/config` (reset, rebuild database) needs no login | ADMIN-1 test | Load testers (scripts reset the database) | **Fix:** operator login for `/config`; load-test scripts log in | Pending |
+| KF-7 | With the default "long run" setting, a completed order is shown once in an alert and then **deleted**, so order history is always empty | ORDER-1 test | Benchmark (stops the order table growing) | **Fix:** keep orders; mark them as alerted instead of deleting. History becomes a real feature | Pending |
+| KF-8 | An unknown symbol in the quotes API returns `[null]` with HTTP 200 | Observed by hand | API clients | **Fix:** HTTP 404 for a single unknown symbol; omit unknown symbols from a list | Pending |
+| KF-9 | Config values `MAX_USERS` and `MAX_QUOTES` in the image don't match the database (1,000/500 set; 500 users and 1,000 quotes present) | Observed by hand | No one | **Drop:** the new slice seeds its own data | Pending |

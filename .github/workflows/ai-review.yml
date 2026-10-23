@@ -1,0 +1,62 @@
+# AI code review on every pull request: review only. Claude may read the diff and comment, but has
+# no write access to the code and no tools that push. The owner reviews and merges every change.
+# Spend: --max-turns caps each run, and the Anthropic workspace that owns ANTHROPIC_API_KEY has a
+# monthly spend limit set in the Anthropic Console. Each run's cost goes to the job summary.
+name: AI review
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+concurrency:
+  group: ai-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    # Pull requests from forks get no secrets, so they're skipped rather than failing.
+    if: github.event.pull_request.head.repo.full_name == github.repository && !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+
+      - name: Review
+        id: review
+        # Pinned to the v1.0.259 commit.
+        uses: anthropics/claude-code-action@515fe2be6e2ac2b3c794f2d41bfca116adaf0976
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            Review this pull request. Read CLAUDE.md first: it sets the migration method and rules.
+            Focus, in this order:
+            1. Correctness, especially money: amounts must use decimal.Decimal with explicit
+               rounding, never float.
+            2. Traceability: each requirement the change claims to meet is traced to a test.
+            3. The guiding principle: the new code meets requirements; it is not a line-by-line
+               port of the Java.
+            4. Security: input validation, secrets, injection.
+            Use inline comments for specific lines and one summary comment. Don't praise; list
+            only findings, most serious first. Say "No findings" if there are none.
+          claude_args: |
+            --max-turns 20
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
+
+      - name: Record cost
+        if: always() && steps.review.outputs.execution_file != ''
+        env:
+          EXECUTION_FILE: ${{ steps.review.outputs.execution_file }}
+        run: |
+          jq -r '[.[] | select(.type == "result")] | last
+            | "| PR | Cost (USD) | Duration (s) | Turns |\n|---|---|---|---|\n| #${{ github.event.pull_request.number }} | \(.total_cost_usd) | \(.duration_ms / 1000) | \(.num_turns) |"' \
+            "$EXECUTION_FILE" >> "$GITHUB_STEP_SUMMARY"

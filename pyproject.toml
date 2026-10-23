@@ -1,0 +1,26 @@
+[project]
+name = "daytrader-to-python"
+version = "0.1.0"
+description = "Migration of DayTrader 8 (Java EE) to Python, by requirements, not by line-by-line porting."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28",
+    "pytest>=8.3",
+    "ruff>=0.7",
+]
+
+[tool.pytest.ini_options]
+markers = [
+    "req(id): the requirement in docs/discovery/requirements.md that this test checks",
+]
+
+[tool.ruff]
+line-length = 100
+extend-exclude = ["legacy"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

@@ -1,0 +1,3 @@
+[submodule "legacy/daytrader8"]
+	path = legacy/daytrader8
+	url = https://github.com/OpenLiberty/sample.daytrader8.git
