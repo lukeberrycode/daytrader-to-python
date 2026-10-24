@@ -111,29 +111,36 @@ The account page has no gain figure. ACCT-1, which said it had, was wrong and is
 
 47 tests (61 test cases with parameters) confirm or correct 37 of the 38 functional requirements. ADMIN-4 is checked by hand. One more test checks the harness itself. Of the non-functional requirements, NFR-1 has a measured baseline, NFR-3 is met by the set-up, and NFR-2 is required by the gate.
 
-## What the gate decided for the new slice
+## Requirements for the new slice (gate, 24 October 2026)
 
-The method turns each decision into a requirement: kept behaviour stays as the requirement says; fixed behaviour becomes a requirement for the corrected behaviour. The characterisation tests for fixed behaviour will run against the new slice with their expected results changed, so each change is visible and traced to its KF entry.
+These are what Planning and Execution build and test against. Where the gate fixed a legacy behaviour, the new slice's requirement has its own ID ending in N, so a reversed behaviour never shares an ID with the legacy one. Every requirement not listed here applies to the new slice unchanged, with its characterisation test.
 
-| Requirement | New slice (from the keep-or-fix decision) |
-|---|---|
-| TRADE-3 | A buy costing more than the cash balance is rejected (KF-1), with a load-test setting if NFR-1 needs it |
-| AUTH-4 | The opening balance must be positive, with at most 2 decimal places (KF-2) |
-| AUTH-3, AUTH-9, AUTH-11 | A failed login shows a message, not an HTTP 500; passwords are hashed and never logged; full card numbers aren't stored or shown (KF-3) |
-| QUOTE-1, MARKET-2, TRADE-6 | Decimal everywhere inside; the JSON API keeps its field names and numeric format (KF-4) |
-| TRADE-5 | Selling a holding twice shows a message, not an HTTP 500 (KF-5) |
-| ADMIN-1 | `/config` needs an operator login (KF-6) |
-| ORDER-1 | Open: KF-7 |
-| QUOTE-2 | A single unknown symbol is an HTTP 404; unknown symbols are left out of a list (KF-8) |
-| SCEN-1, ADMIN-4 | Users and quotes are seeded from one setting (KF-9) |
-| HOME-2, PORT-1 | Gain percentages are computed, then rounded half-up to 2 places (KF-10) |
-| HOME-1 | Holdings are valued at the current price (KF-11) |
-| TRADE-7 | Quantities are exact decimals; money is rounded half-up to 2 places before saving (KF-12, NFR-2) |
-| HOME-3 | The home page works for every holding (KF-13) |
-| QUOTE-4 | Low and high follow each price change (KF-14) |
-| MARKET-1 | Kept: the index is the mean of all stocks; the documentation says so (KF-15) |
-| TRADE-6 | An invalid quantity shows a message on the trade page (KF-16) |
-| ADMIN-3 | A configuration update changes only the settings it includes (KF-17) |
+Each N requirement has a planned test. "Changed" means the characterisation test runs against the new slice with its expected result changed to this one; "new" means a test the legacy app can't have.
+
+| ID | Requirement | From | Planned test |
+|---|---|---|---|
+| MONEY-1N | Money and quantities are exact decimals everywhere, never binary floating point. Money is rounded half-up to 2 places at the points the requirements name, never truncated. The JSON API keeps the legacy field names and writes money with exactly 2 decimal places and volumes and quantities as exact decimals, never through a float | KF-4, NFR-2 | New: every number in every JSON response parses as an exact decimal with the expected places |
+| TRADE-7N | A quantity is a decimal above 0, at most 1,000,000, with at most 4 decimal places. Trade value = quantity × price, rounded half-up to 2 places; a buy debits value + fee, a sell credits value − fee. 0.1 share at 10.00 costs 25.95 | KF-12 | Changed: the TRADE-7 tests, including the seeded-price ones |
+| TRADE-6N | A quantity outside TRADE-7N's rule, or that isn't a number (including `NaN` and `Infinity`), gets a message on the trade page; no money moves | KF-16 | Changed: the TRADE-6 tests, plus `NaN`, `Infinity`, too many places and too large |
+| TRADE-3N | A buy costing more than the cash balance is rejected with a message; no money moves. A load-test setting, off by default, allows it if NFR-1 needs it | KF-1 | Changed: TRADE-3 |
+| TRADE-5N | Selling a holding that's already sold gets a message; no money moves | KF-5 | Changed: TRADE-5 |
+| AUTH-4N | An opening balance must be a number above 0, at most 999,999,999,999.99 (the legacy column's limit), with at most 2 decimal places; anything else gets a message | KF-2 | Changed: AUTH-4, plus `NaN`, `Infinity`, too many places and too large |
+| AUTH-3N | A wrong password and an unknown user ID get the same message on the login page, so login doesn't reveal which user IDs exist; never an HTTP 500 | KF-3 | Changed: AUTH-3, AUTH-9 |
+| AUTH-13N | Passwords are stored hashed with a slow password hash (e.g. Argon2id). Seeded users are hashed from their seed passwords, so load-test scripts still log in | KF-3 | New: the stored value is a hash; seeded users log in |
+| AUTH-14N | No secret is ever written to a log: passwords, session IDs and card numbers | KF-3 | New: failed logins, registrations and profile updates, then the logs searched for the values used |
+| AUTH-11N | The account page never contains the password. Only the last 4 digits of a card are stored and shown | KF-3 | Changed: AUTH-11 |
+| ADMIN-1N | `/config` and every operator action need an operator login | KF-6 | Changed: ADMIN-1 |
+| ADMIN-2N | The reset also removes orders and holdings that load tests created for the seeded users, restoring the seeded data | KF-7 | Changed: ADMIN-2 |
+| ADMIN-3N | A configuration update changes only the settings it includes | KF-17 | Changed: ADMIN-3 |
+| ORDER-1N | Every order is kept; none is ever deleted. The completion alert is shown once and marks the order as alerted. The account page shows the order history. The orders table is partitioned by month if it grows (the size that triggers it is a Planning decision) | KF-7 | Changed: both ORDER-1 tests |
+| QUOTE-2N | A single unknown symbol is an HTTP 404; unknown symbols are left out of a list | KF-8 | Changed: QUOTE-2 |
+| QUOTE-4N | A quote's low and high follow its price through the session | KF-14 | Changed: QUOTE-4 |
+| SEED-1N | Users and quotes are seeded from one setting each, which the reset, the rebuild and any load driver read | KF-9 | Changed: SCEN-1 (if S6 keeps the scenario servlet), ADMIN-4 |
+| HOME-1N | The home page values holdings at the current price | KF-11 | Changed: HOME-1 |
+| HOME-2N | Gain percentages are (current ÷ opening − 1) × 100, computed exactly, then rounded half-up to 2 places, on the home and portfolio pages | KF-10 | Changed: HOME-2, PORT-1 |
+| HOME-3N | The home page works for every holding | KF-13 | Changed: HOME-3 |
+
+Kept, with the documentation corrected: MARKET-1 (the index is the mean price of every stock, KF-15).
 
 Dropped, with the reason:
 

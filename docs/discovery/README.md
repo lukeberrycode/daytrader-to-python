@@ -17,12 +17,12 @@ The first phase of the method (`docs/method.md`), run on DayTrader 8.
 
 ## First gate: status
 
-**Passed except KF-7** (24 October 2026). Luke accepted every scope and keep-or-fix suggestion except KF-7, which is open: how long to keep orders (`keep-or-fix.md`).
+**Passed** (24 October 2026). Luke accepted every scope and keep-or-fix suggestion, chose option 1 for KF-7 (keep every order), and accepted Claude's recommendations on the AI review's points: the new slice's requirements are in `requirements.md`, with their own IDs and a planned test each. Planning can start.
 
 - [x] Every functional requirement confirmed or corrected by a characterisation test, except ADMIN-4 (checked by hand: it destroys all data). Of the non-functional ones, NFR-1 has a measured baseline, NFR-3 is met by the set-up, and NFR-2 waits on KF-4 and KF-12.
 - [x] Every one of the manual's 13 features traced to at least one tested requirement (`requirements.md`).
 - [x] A JMeter baseline for NFR-1 on the legacy app (`perf/baseline.md`).
 - [x] Luke: scope decisions S1–S6 (`requirements.md`), 24 October 2026.
 - [x] Luke: keep-or-fix decisions KF-1 to KF-6 and KF-8 to KF-17, 24 October 2026.
-- [ ] Luke: KF-7 (how long to keep orders).
-- [ ] Luke: sign off the requirements once KF-7 is decided (ORDER-1 is high risk and has no agreed behaviour yet), so Planning starts after it. The dropped scope and its reason are in `requirements.md`.
+- [x] Luke: KF-7, keep every order (24 October 2026).
+- [x] Luke: sign off the requirements, including the new slice's (`requirements.md`) and the dropped scope with its reason (24 October 2026).
