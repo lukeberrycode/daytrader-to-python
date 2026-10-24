@@ -135,4 +135,8 @@ The method turns each decision into a requirement: kept behaviour stays as the r
 | TRADE-6 | An invalid quantity shows a message on the trade page (KF-16) |
 | ADMIN-3 | A configuration update changes only the settings it includes (KF-17) |
 
-Dropped, with the reason (S2, S3, S6): the alternative runtime and order-processing modes and the benchmark primitives test Java EE features, not trading; the scenario servlet goes unless NFR-1 needs it.
+Dropped, with the reason:
+
+- **S1:** the second web interface. The JSP and JSF interfaces have the same behaviour, so the new slice has one web UI; NFR-1's script will need adapting to it.
+- **S2 and S3:** the alternative runtime and order-processing modes and the benchmark primitives. They test Java EE features, not trading.
+- **S6:** the scenario servlet, unless NFR-1 needs it. If it stays, SCEN-1's new-slice requirement (users seeded from one setting, KF-9) applies to it.

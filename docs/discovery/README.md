@@ -25,4 +25,4 @@ The first phase of the method (`docs/method.md`), run on DayTrader 8.
 - [x] Luke: scope decisions S1–S6 (`requirements.md`), 24 October 2026.
 - [x] Luke: keep-or-fix decisions KF-1 to KF-6 and KF-8 to KF-17, 24 October 2026.
 - [ ] Luke: KF-7 (how long to keep orders).
-- [x] Luke: sign off the requirements; the dropped scope and its reason are in `requirements.md`, 24 October 2026.
+- [ ] Luke: sign off the requirements once KF-7 is decided (ORDER-1 is high risk and has no agreed behaviour yet), so Planning starts after it. The dropped scope and its reason are in `requirements.md`.

@@ -32,4 +32,4 @@ Luke's question at the gate: should orders older than some limit be deleted, so 
   1. Keep every order (Claude's suggestion). Partition the table by month if it grows, so old months cost nothing on everyday queries.
   2. Keep every order, but move orders older than a set age to cheaper archive storage, still retrievable.
   3. Delete after a set age (configurable, off by default). Simplest, but not what a regulated broker could do.
-- **Load tests** don't need deletion in the app: the reset (ADMIN-2) already removes test users' orders between runs.
+- **Load tests** are the case that needs thought. DayTrader's JMeter script trades mostly as the seeded `uid:` users and registers `ru:` users. The reset (ADMIN-2) removes only the `ru:` users' orders, so with every order kept, the seeded users' orders would pile up across runs. The new slice's reset could also clear the seeded users' orders: a load-test feature, separate from how long real orders are kept. (Corrected after the AI review of the gate record: an earlier version said the reset already removed them.)
