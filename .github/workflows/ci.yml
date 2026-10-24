@@ -18,11 +18,13 @@ concurrency:
 
 jobs:
   checks:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v10.3.2
+        with:
+          version: "0.13.5"
       - run: uv sync --locked
       - name: Lint
         run: uv run ruff check
@@ -30,19 +32,21 @@ jobs:
         run: uv run ruff format --check
 
   characterisation:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
         with:
           submodules: true
       - uses: astral-sh/setup-uv@v10.3.2
+        with:
+          version: "0.13.5"
       - run: uv sync --locked
       - name: Build the legacy app
         run: docker build -t daytrader8-legacy -f legacy/docker/Dockerfile legacy
       - name: Start the legacy app
         run: |
-          docker run -d --name legacy -p 9080:9080 daytrader8-legacy
+          docker run -d --name legacy -p 127.0.0.1:9080:9080 daytrader8-legacy
           scripts/wait-for-legacy.sh
       - name: Characterisation tests (legacy)
         run: uv run pytest tests/characterisation

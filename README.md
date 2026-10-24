@@ -19,17 +19,17 @@ The method is in [`docs/method.md`](docs/method.md). In short:
 
 ## Running the legacy app
 
-Needs Docker and [uv](https://docs.astral.sh/uv/).
+Needs Docker and [uv](https://docs.astral.sh/uv/) 0.13.5 (pinned in `pyproject.toml`; `uv self update 0.13.5`).
 
 ```sh
 git clone --recurse-submodules https://github.com/lukeberrycode/daytrader-to-python.git
 cd daytrader-to-python
 docker build -t daytrader8-legacy -f legacy/docker/Dockerfile legacy
-docker run -d --name legacy -p 9080:9080 daytrader8-legacy
+docker run -d --name legacy -p 127.0.0.1:9080:9080 daytrader8-legacy
 scripts/wait-for-legacy.sh
 ```
 
-Then open http://localhost:9080/daytrader (log in as `uid:0`, password `xxx`).
+Then open http://localhost:9080/daytrader (log in as `uid:0`, password `xxx`). The port is bound to `127.0.0.1` on purpose: the legacy app has an admin page with no login and stores passwords in plain text, so it shouldn't be reachable from other machines.
 
 ## Characterisation tests
 

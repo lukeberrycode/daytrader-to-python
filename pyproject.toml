@@ -13,6 +13,10 @@ dev = [
     "ruff>=0.7",
 ]
 
+[tool.uv]
+# Keep in step with the version in .github/workflows/ci.yml.
+required-version = "==0.13.5"
+
 [tool.pytest.ini_options]
 markers = [
     "req(id): the requirement in docs/discovery/requirements.md that this test checks",
