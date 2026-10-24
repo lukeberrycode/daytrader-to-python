@@ -1,6 +1,6 @@
 # AI code review on every pull request: review only. Claude may read the diff and comment, but has
 # no write access to the code and no tools that push. The owner reviews and merges every change.
-# Spend: --max-turns caps each run, and the Anthropic workspace that owns ANTHROPIC_API_KEY has a
+# Spend: --max-turns caps each run (40: a large pull request took 29), and the Anthropic workspace that owns ANTHROPIC_API_KEY has a
 # monthly spend limit set in the Anthropic Console. Each run's cost goes to the job summary.
 name: AI review
 
@@ -51,7 +51,7 @@ jobs:
             Use inline comments for specific lines and one summary comment. Don't praise; list
             only findings, most serious first. Say "No findings" if there are none.
           claude_args: |
-            --max-turns 20
+            --max-turns 40
             --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
 
       - name: Record cost

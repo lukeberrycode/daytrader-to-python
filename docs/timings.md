@@ -43,3 +43,4 @@ Real API spend, from each run's job summary (`.github/workflows/ai-review.yml`).
 | #1 | 1 | 0.00 | Failed before calling the API: the action expected the Claude GitHub App. Fixed by using the workflow's own token |
 | #1 | 2 | 0.23 | 2 findings (actions pinned by tag; uv version in four places), both fixed in the same pull request |
 | #1 | 3 | 0.19 | No findings; listed two things it couldn't check from the job, both checked by hand |
+| #2 | 1 | 0.78 | 7 findings, all fixed in the same pull request; marked failed for taking 29 turns against a cap of 20 (cap raised to 40) |

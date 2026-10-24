@@ -16,8 +16,10 @@ DEFAULTS = {
 
 @pytest.fixture
 def restore_config(client):
+    max_quotes = client.config_fields()["MaxQuotes"]
     yield
-    client.admin(action="updateConfig", **DEFAULTS)
+    client.admin(action="updateConfig", MaxQuotes=max_quotes, **DEFAULTS)
+    assert client.config_fields()["MaxQuotes"] == max_quotes
 
 
 @pytest.mark.req("ADMIN-3")
@@ -25,7 +27,7 @@ def test_a_config_update_turns_off_every_setting_it_omits(client, restore_config
     # Keep-or-fix KF-17: the form's checkboxes are read as "off" when absent, so changing one
     # setting from a script turns off long run, order alerts and the price streamer. With long
     # run off, completed orders are kept (compare ORDER-1).
-    client.admin(action="updateConfig", MaxQuotes="1000")
+    client.admin(action="updateConfig", MaxQuotes=client.config_fields()["MaxQuotes"])
     user = LegacyClient()
     try:
         user.register(f"ct-{uuid.uuid4().hex[:12]}", "pw", "1000")
@@ -38,6 +40,8 @@ def test_a_config_update_turns_off_every_setting_it_omits(client, restore_config
 
 @pytest.mark.req("ADMIN-2")
 def test_reset_removes_ru_users_and_zeroes_seeded_login_counts(client):
+    # The deleted user's orders and holdings can't be seen through the boundary once the user is
+    # gone; that part of ADMIN-2 is from the code (TradeDirectDBUtils.resetTrade).
     removed = f"ru:{uuid.uuid4().hex[:8]}"
     kept = f"ct-{uuid.uuid4().hex[:12]}"
     for user_id in (removed, kept):
@@ -57,6 +61,11 @@ def test_reset_removes_ru_users_and_zeroes_seeded_login_counts(client):
 def test_the_scenario_servlet_fails_for_users_missing_from_the_database(client):
     # Keep-or-fix KF-9: the servlet picks users up to MAX_USERS (1000, from the image) but the
     # database has uid:0 to uid:499, so a large share of requests are HTTP 500.
+    assert client.config_fields()["MaxUsers"] == "1000"
+    client.login("uid:499", "xxx")
+    client.logout()
+    with pytest.raises(httpx.HTTPStatusError):
+        client.login("uid:500", "xxx")  # the first user the database doesn't have
     statuses = [client.scenario() for _ in range(40)]
     assert 200 in statuses
     assert 500 in statuses

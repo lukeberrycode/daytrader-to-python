@@ -176,14 +176,13 @@ class LegacyClient:
         """The values in the account page's profile form."""
         response = self._http.get("/app", params={"action": "account"})
         response.raise_for_status()
-        inputs = re.findall(r"<INPUT[^>]*>", response.text, flags=re.I)
-        fields = {}
-        for tag in inputs:
-            name = re.search(r'name="([^"]+)"', tag, flags=re.I)
-            value = re.search(r'value="([^"]*)"', tag, flags=re.I)
-            if name:
-                fields[name.group(1)] = html.unescape(value.group(1)) if value else ""
-        return fields
+        return _form_fields(response.text)
+
+    def config_fields(self) -> dict[str, str]:
+        """The values in the configuration page's form."""
+        response = self._http.get("/config")
+        response.raise_for_status()
+        return _form_fields(response.text)
 
     def login_counts(self) -> tuple[int, int]:
         page = self.account_page()
@@ -264,6 +263,16 @@ class LegacyClient:
             raise AssertionError(f"No order details on the page: {page[:500]}")
         order_id, status, fee, order_type, symbol, quantity = match.groups()
         return Order(int(order_id), status, Decimal(fee), order_type, symbol, Decimal(quantity))
+
+
+def _form_fields(page: str) -> dict[str, str]:
+    fields = {}
+    for tag in re.findall(r"<INPUT[^>]*>", page, flags=re.I | re.S):
+        name = re.search(r'name="([^"]+)"', tag, flags=re.I)
+        value = re.search(r'value="([^"]*)"', tag, flags=re.I)
+        if name:
+            fields[name.group(1)] = html.unescape(value.group(1)) if value else ""
+    return fields
 
 
 def _quote(data: dict) -> Quote:

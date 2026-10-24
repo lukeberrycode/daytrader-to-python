@@ -181,6 +181,9 @@ def test_a_fractional_trade_is_rounded_against_the_trader(client, new_user, quan
     before = client.cash_balance()
     price = client.quote(SYMBOL).price
     client.buy(SYMBOL, quantity)
+    # float() here models the legacy app's Java double on purpose; it is the behaviour under test.
+    # CLAUDE.md's no-float rule is for the new slice. A seeded-price test pins this down exactly
+    # (test_prices.py).
     exact = Decimal(float(quantity)) * price + ORDER_FEE  # what Java's new BigDecimal(double) does
     assert client.cash_balance() == (before - exact).quantize(CENT, rounding=ROUND_DOWN)
 
@@ -215,6 +218,7 @@ def test_gain_percentages_are_rounded_to_whole_percent(client, new_user):
 @pytest.mark.req("HOME-3")
 def test_a_holding_worth_more_than_two_decimal_places_breaks_the_home_page(client, new_user):
     # Keep-or-fix KF-13: price x quantity is set to 2 places with no rounding mode, which throws.
+    # The quantity is a double, so 0.1 has dozens of decimal places and this fails at any price.
     client.buy(SYMBOL, "0.1")
     assert client.status(action="home") == 500
     assert client.status(action="portfolio") == 200

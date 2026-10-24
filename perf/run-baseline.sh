@@ -2,7 +2,8 @@
 # NFR-1 baseline: the legacy app under DayTrader's own JMeter workload (daytrader8.jmx),
 # following the procedure in its FAQ: reset, warm up, reset, measure.
 # Usage: perf/run-baseline.sh [threads] [seconds]. Needs the legacy app on localhost:9080.
-# Results go to perf/results/<timestamp>/ (summary.csv, report/ and environment.txt).
+# Results go to perf/results/<timestamp>/: statistics.json and environment.txt (committed), and
+# results.jtl, report/ and jmeter.log (ignored by git).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 threads="${1:-10}"
