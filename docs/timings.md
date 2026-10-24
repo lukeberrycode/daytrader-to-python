@@ -48,6 +48,6 @@ Real API spend, from each run's job summary (`.github/workflows/ai-review.yml`).
 | #2 | 3 | 0.74 | 6 findings, including a flaky SCEN-1 test that CI then failed on, and fixture errors that could pass silently. All fixed |
 | #2 | 4 | 0.92 | 6 findings: two tests that couldn't fail (ADMIN-2, HOME-2), two requirements broader than their tests (AUTH-7, MARKET-2), two wording. All fixed |
 | #2 | 5 | 0.76 | 1 finding (posted inline; the summary comment was blocked): ORDER-1's evidence couldn't tell deleted orders from hidden ones. A new test shows they're deleted. Marked failed after 4 permission denials |
-| #2 | 6 | 0.00 | Failed before any model ran (0.6 seconds, no tokens); the log gives no reason. Checked in the Anthropic Console |
+| #2 | 6 | 0.00 | Failed before any model ran (0.6 seconds, no tokens); the log gives no reason. For Luke to check in the Anthropic Console (spend limit or credit balance) |
 
 Total real AI review spend: **$4.45** ($0.42 on #1, $4.03 on #2).
