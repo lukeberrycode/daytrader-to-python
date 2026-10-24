@@ -4,7 +4,7 @@
 
 | Part | Technology | Where |
 |---|---|---|
-| Server | Open Liberty (`open-liberty:full` image), Java EE 8 features: EJB 3.2, Servlet 4.0, JSF 2.3, JPA 2.2, MDB 3.2, JMS 2.0, CDI 2.0, WebSocket 1.1, JAX-RS 2.1, JSON-P/B, Bean Validation 2.0 | `src/main/liberty/config/server.xml` |
+| Server | Open Liberty 26.0.0.9 on IBM Semeru Java 8 (image pinned by digest in `legacy/docker/Dockerfile`), Java EE 8 features: EJB 3.2, Servlet 4.0, JSF 2.3, JPA 2.2, MDB 3.2, JMS 2.0, CDI 2.0, WebSocket 1.1, JAX-RS 2.1, JSON-P/B, Bean Validation 2.0 | `src/main/liberty/config/server.xml` |
 | Web UI 1 (default) | JSP pages via `TradeAppServlet` (`/app?action=…`) | `web/servlet/`, `webapp/*.jsp` |
 | Web UI 2 | JSF (`*.faces`, `.xhtml`) with backing beans | `web/jsf/`, `webapp/*.xhtml` |
 | REST | JAX-RS: `GET /rest/quotes/{symbols}`, `POST /rest/quotes`, broadcast events | `jaxrs/` |

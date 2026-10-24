@@ -31,3 +31,12 @@ Each phase is estimated before it starts. "Luke" is his hands-on time: reviewing
 **Note on Discovery part 1, Luke's time.** Luke estimates his hands-on time at about half of the 91 minutes from 14:44, when the agent first asked him for an estimate, to 16:15: about 0.76 hours. Most of it went on deciding the estimation method (`estimation.md`). That's a one-off: it hadn't been done before and won't need doing again, so it overstates the review time a phase would normally need.
 
 **Note on Discovery part 1, tokens.** The build is 14:36 to 14:44 (50 responses). The follow-up is 14:44 to 16:22 (37 responses): the licence, publishing the method, and defining the estimation method. As with Luke's time, most of the follow-up went on the estimation method, a one-off. Figures are from the Claude Code session log (`usage` on each response).
+
+## AI review costs
+
+Real API spend, from each run's job summary (`.github/workflows/ai-review.yml`).
+
+| Pull request | Run | Cost (USD) | Note |
+|---|---|---|---|
+| #1 | 1 | 0.00 | Failed before calling the API: the action expected the Claude GitHub App. Fixed by using the workflow's own token |
+| #1 | 2 | 0.23 | 2 findings (actions pinned by tag; uv version in four places), both fixed in the same pull request |

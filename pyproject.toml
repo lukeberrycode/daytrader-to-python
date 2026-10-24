@@ -13,6 +13,10 @@ dev = [
     "ruff>=0.7",
 ]
 
+[tool.uv]
+# The one place the uv version is set: CI's setup-uv step reads it from here.
+required-version = "==0.13.5"
+
 [tool.pytest.ini_options]
 markers = [
     "req(id): the requirement in docs/discovery/requirements.md that this test checks",
