@@ -14,7 +14,7 @@ dev = [
 ]
 
 [tool.uv]
-# Keep in step with the version in .github/workflows/ci.yml.
+# The one place the uv version is set: CI's setup-uv step reads it from here.
 required-version = "==0.13.5"
 
 [tool.pytest.ini_options]

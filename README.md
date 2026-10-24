@@ -19,7 +19,7 @@ The method is in [`docs/method.md`](docs/method.md). In short:
 
 ## Running the legacy app
 
-Needs Docker and [uv](https://docs.astral.sh/uv/) 0.13.5 (pinned in `pyproject.toml`; `uv self update 0.13.5`).
+Needs Docker and [uv](https://docs.astral.sh/uv/) at the version set by `required-version` in `pyproject.toml` (`uv self update <version>`).
 
 ```sh
 git clone --recurse-submodules https://github.com/lukeberrycode/daytrader-to-python.git
