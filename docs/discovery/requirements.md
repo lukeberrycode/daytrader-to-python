@@ -6,9 +6,11 @@ Requirements start as a hypothesis drawn from the code. A characterisation test 
 
 Behaviour that looks wrong is described as it is, with a link to `keep-or-fix.md`. The gate decides whether the new slice keeps it.
 
-## Scope (decisions for the gate)
+## Scope (decided at the gate, 24 October 2026)
 
-| # | Question | Claude's suggestion |
+Luke accepted every suggestion.
+
+| # | Question | Decision (Claude's suggestion, accepted) |
 |---|---|---|
 | S1 | Which web interface does the new slice replace: JSP, JSF, or both? | One new web UI meeting the trader requirements; both old UIs have the same behaviour |
 | S2 | Keep the three runtime modes and three order-processing modes? | No: they are alternative implementations for benchmarking. Keep the behaviour of the default (EJB3, synchronous) |
@@ -102,9 +104,35 @@ The account page has no gain figure. ACCT-1, which said it had, was wrong and is
 | ID | Requirement | Source | Status |
 |---|---|---|---|
 | NFR-1 | Throughput and response times under the JMeter workload `daytrader8.jmx` no worse than the legacy app's baseline on the same machine | `jmeter_files/`, `perf/` | Baseline measured: `perf/baseline.md` |
-| NFR-2 | Money is exact decimal, rounded half-up to 2 places, never binary floating point | here | Gate: the legacy app doesn't do this for fractional quantities (TRADE-7), so NFR-2 depends on KF-4 and KF-12 |
+| NFR-2 | Money is exact decimal, rounded half-up to 2 places, never binary floating point | here | Required: KF-4 and KF-12 fixed (Luke, 24 October 2026) |
 | NFR-3 | Runs locally in containers from one command | here | Confirmed for the legacy app |
 
 ## Coverage
 
-47 tests (61 test cases with parameters) confirm or correct 37 of the 38 functional requirements. ADMIN-4 is checked by hand. One more test checks the harness itself. Of the non-functional requirements, NFR-1 has a measured baseline, NFR-3 is met by the set-up, and NFR-2 waits on the gate.
+47 tests (61 test cases with parameters) confirm or correct 37 of the 38 functional requirements. ADMIN-4 is checked by hand. One more test checks the harness itself. Of the non-functional requirements, NFR-1 has a measured baseline, NFR-3 is met by the set-up, and NFR-2 is required by the gate.
+
+## What the gate decided for the new slice
+
+The method turns each decision into a requirement: kept behaviour stays as the requirement says; fixed behaviour becomes a requirement for the corrected behaviour. The characterisation tests for fixed behaviour will run against the new slice with their expected results changed, so each change is visible and traced to its KF entry.
+
+| Requirement | New slice (from the keep-or-fix decision) |
+|---|---|
+| TRADE-3 | A buy costing more than the cash balance is rejected (KF-1), with a load-test setting if NFR-1 needs it |
+| AUTH-4 | The opening balance must be positive, with at most 2 decimal places (KF-2) |
+| AUTH-3, AUTH-9, AUTH-11 | A failed login shows a message, not an HTTP 500; passwords are hashed and never logged; full card numbers aren't stored or shown (KF-3) |
+| QUOTE-1, MARKET-2, TRADE-6 | Decimal everywhere inside; the JSON API keeps its field names and numeric format (KF-4) |
+| TRADE-5 | Selling a holding twice shows a message, not an HTTP 500 (KF-5) |
+| ADMIN-1 | `/config` needs an operator login (KF-6) |
+| ORDER-1 | Open: KF-7 |
+| QUOTE-2 | A single unknown symbol is an HTTP 404; unknown symbols are left out of a list (KF-8) |
+| SCEN-1, ADMIN-4 | Users and quotes are seeded from one setting (KF-9) |
+| HOME-2, PORT-1 | Gain percentages are computed, then rounded half-up to 2 places (KF-10) |
+| HOME-1 | Holdings are valued at the current price (KF-11) |
+| TRADE-7 | Quantities are exact decimals; money is rounded half-up to 2 places before saving (KF-12, NFR-2) |
+| HOME-3 | The home page works for every holding (KF-13) |
+| QUOTE-4 | Low and high follow each price change (KF-14) |
+| MARKET-1 | Kept: the index is the mean of all stocks; the documentation says so (KF-15) |
+| TRADE-6 | An invalid quantity shows a message on the trade page (KF-16) |
+| ADMIN-3 | A configuration update changes only the settings it includes (KF-17) |
+
+Dropped, with the reason (S2, S3, S6): the alternative runtime and order-processing modes and the benchmark primitives test Java EE features, not trading; the scenario servlet goes unless NFR-1 needs it.
