@@ -188,6 +188,17 @@ def test_a_fractional_trade_is_rounded_against_the_trader(client, new_user, quan
     assert client.cash_balance() == (before - exact).quantize(CENT, rounding=ROUND_DOWN)
 
 
+@pytest.mark.req("TRADE-7")
+def test_a_fractional_sale_is_truncated_toward_zero_too(client, new_user):
+    client.buy(SYMBOL, "0.3")
+    (holding_id,) = client.holding_ids()
+    before = client.cash_balance()
+    price = client.quote(SYMBOL).price
+    client.sell(holding_id)
+    exact = before + Decimal(float("0.3")) * price - ORDER_FEE  # float() models Java's double
+    assert client.cash_balance() == exact.quantize(CENT, rounding=ROUND_DOWN)
+
+
 @pytest.mark.req("HOME-1")
 def test_home_page_values_holdings_at_purchase_cost(client, new_user):
     # Keep-or-fix KF-11: "total of holdings" is the purchase cost, not the market value the

@@ -11,22 +11,29 @@ ALL_SYMBOLS = [f"s:{i}" for i in range(1000)]
 
 @pytest.mark.req("QUOTE-2")
 def test_the_quotes_api_returns_null_for_an_unknown_symbol(client):
-    quotes = client.quotes(["s:1", "no-such-symbol", "s:2"])
+    quotes = client.quotes(["s:1", "no-such-symbol", "s:2"])  # POST
     assert [q.symbol if q else None for q in quotes] == ["s:1", None, "s:2"]
+    by_get = client.raw_quotes_get("s:1,no-such-symbol,s:2")
+    assert [q["symbol"] if q else None for q in by_get] == ["s:1", None, "s:2"]
 
 
 @pytest.mark.req("QUOTE-3")
 def test_the_quotes_page_shows_each_symbol_with_its_price(client, new_user):
     page = client.quotes_page("s:1,s:2")
-    for quote in client.quotes(["s:1", "s:2"]):
-        assert f"{quote.symbol} S{quote.symbol[2:]} Incorporated" in page
-        assert f"$ {quote.price}" in page
+    for q in client.quotes(["s:1", "s:2"]):
+        # symbol, company, volume, low - high, open, $ current price, change (gain %)
+        company = f"S{q.symbol[2:]} Incorporated"
+        row = f"{q.symbol} {company} {q.volume:.1f} {q.low} - {q.high} {q.open} $ {q.price} "
+        assert row in page
+        assert f"$ {q.price} {q.change} (" in page
 
 
 @pytest.mark.req("QUOTE-4")
-def test_low_and_high_never_move_from_the_opening_price(client):
+def test_low_and_high_never_move_from_the_opening_price(client, new_user):
     # Keep-or-fix KF-14: trades change the price but never the low or high, so the
     # "price range" is always the opening price, contrary to the glossary.
+    for _ in range(3):  # a trade can leave the price unchanged (a factor of 1.00)
+        client.buy("s:40", "1")
     moved = [q for q in client.quotes(ALL_SYMBOLS) if q and q.price != q.open]
     assert moved, "no stock has moved since opening"
     assert all(q.low == q.open == q.high for q in moved)

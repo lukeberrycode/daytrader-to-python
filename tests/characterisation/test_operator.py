@@ -16,10 +16,12 @@ DEFAULTS = {
 
 @pytest.fixture
 def restore_config(client):
-    max_quotes = client.config_fields()["MaxQuotes"]
+    fields, switches = client.config_fields(), client.config_switches()
+    assert all(switches.values()), "the defaults have every switch on"
     yield
-    client.admin(action="updateConfig", MaxQuotes=max_quotes, **DEFAULTS)
-    assert client.config_fields()["MaxQuotes"] == max_quotes
+    client.admin(action="updateConfig", MaxQuotes=fields["MaxQuotes"], **DEFAULTS)
+    assert client.config_fields() == fields
+    assert client.config_switches() == switches
 
 
 @pytest.mark.req("ADMIN-3")
@@ -28,6 +30,11 @@ def test_a_config_update_turns_off_every_setting_it_omits(client, restore_config
     # setting from a script turns off long run, order alerts and the price streamer. With long
     # run off, completed orders are kept (compare ORDER-1).
     client.admin(action="updateConfig", MaxQuotes=client.config_fields()["MaxQuotes"])
+    assert client.config_switches() == {
+        "EnablePublishQuotePriceChange": False,
+        "DisplayOrderAlerts": False,
+        "EnableLongRun": False,
+    }
     user = LegacyClient()
     try:
         user.register(f"ct-{uuid.uuid4().hex[:12]}", "pw", "1000")

@@ -178,6 +178,22 @@ class LegacyClient:
         response.raise_for_status()
         return _form_fields(response.text)
 
+    def config_switches(self) -> dict[str, bool]:
+        """The configuration page's checkboxes: name -> checked."""
+        response = self._http.get("/config")
+        response.raise_for_status()
+        tags = re.findall(r"<INPUT[^>]*>", response.text, flags=re.I | re.S)
+        return {
+            re.search(r'name="([^"]+)"', t, re.I).group(1): bool(re.search(r"\bchecked\b", t, re.I))
+            for t in tags
+            if re.search(r'type="checkbox"', t, re.I)
+        }
+
+    def raw_quotes_get(self, symbols: str) -> list:
+        response = self._http.get(f"/rest/quotes/{symbols}")
+        response.raise_for_status()
+        return response.json(parse_float=Decimal, parse_int=Decimal)
+
     def config_fields(self) -> dict[str, str]:
         """The values in the configuration page's form."""
         response = self._http.get("/config")

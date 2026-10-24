@@ -2,7 +2,7 @@
 # "checks": lint and format. Unit tests join it when the new slice has code.
 # "characterisation": builds the unmodified DayTrader 8 from the pinned submodule, starts it, and
 # runs the characterisation tests against it. Later, the same tests run against the new slice.
-# A second container runs the "fixtures" image (seeded prices) for PRICE-2 and PRICE-3.
+# A second container runs the "fixtures" image (prices seeded in its database) for test_prices.py.
 name: CI
 
 on:

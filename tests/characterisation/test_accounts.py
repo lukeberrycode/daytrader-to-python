@@ -54,6 +54,8 @@ def test_profile_update_changes_the_profile_and_the_password(client, new_user):
     fields = client.profile_fields()
     assert fields["fullname"] == "Changed Name"
     assert fields["email"] == "changed@example.com"
+    assert fields["address"] == "2 Test Street"
+    assert fields["creditcard"] == "1111-1111-1111-1111"
     client.logout()
     assert f"Welcome {new_user}," in client.login(new_user, "new-secret")
 

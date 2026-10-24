@@ -38,7 +38,7 @@ uv sync
 uv run pytest tests/characterisation
 ```
 
-Two price rules (PRICE-2, PRICE-3) need the `fixtures` image, the same app with two prices seeded. Without it those two tests are skipped:
+The tests that need set prices (PRICE-2, PRICE-3, and some TRADE-7 and HOME-3 cases) use the `fixtures` image: the same app with a few prices set in its database before it starts. Without it those tests are skipped:
 
 ```sh
 docker build -t daytrader8-legacy-fixtures --target fixtures -f legacy/docker/Dockerfile legacy
@@ -46,7 +46,7 @@ docker run -d --name fixtures -p 127.0.0.1:9081:9080 daytrader8-legacy-fixtures
 FIXTURES_URL=http://localhost:9081/daytrader uv run pytest tests/characterisation
 ```
 
-Each fixtures container can run those two tests once: their trades change the seeded prices.
+Each fixtures container can run those tests once, because their trades change the seeded prices. On a used container they skip and say so.
 
 ## Performance baseline
 
