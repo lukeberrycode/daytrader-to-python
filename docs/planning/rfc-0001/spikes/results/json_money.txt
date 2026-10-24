@@ -1,0 +1,6 @@
+FAIL  stdlib json: error: TypeError: Object of type Decimal is not JSON serializable
+FAIL  stdlib json, default=float: {"price": 25.9, "volume": 244711.85}
+PASS  simplejson, use_decimal: {"price": 25.90, "volume": 244711.85}
+FAIL  Django JsonResponse encoder: {"price": "25.90", "volume": "244711.85"}
+FAIL  Pydantic v2 (FastAPI's default): {"price":"25.90","volume":"244711.85"}
+FAIL  Pydantic v2, mode=python then stdlib json: {"price": 25.9, "volume": 244711.85}

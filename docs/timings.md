@@ -25,6 +25,7 @@ Each phase is estimated before it starts. "Luke" is his hands-on time: reviewing
 | Discovery, part 1: set-up, running locally, first documents and tests | (in the phase estimate) | 23 Oct 2026 14:36 | 23 Oct 2026 14:43 (file times) | 0.76 (see note) | 0.12 | Subscription. Build: 42.8k output, 5.78M cache-read, 131k cache-write; API-equivalent $3.06. Follow-up (see note): 35.5k output, 6.96M cache-read, 91k cache-write; API-equivalent $2.83. **Total API-equivalent $5.89** |
 | Discovery, part 2: remaining tests and the first gate | (in the phase estimate) | 24 Oct 2026 19:06 | 24 Oct 2026 20:00 (last push); gate passed 24 Oct 2026 | 0.50 (30 minutes: review and gate decisions, including KF-7) | 0.91 (includes a 5-minute load test and five rounds of AI review fixes) | Subscription. 104.1k output, 33.6M cache-read, 150k cache-write; API-equivalent $10.01 |
 | Planning | **71.2** (O 50.75, M 71.5, P 90.5; `estimation.md`, made 24 Oct 2026 before the phase started) | | | | | |
+| Planning: RFC-0001 (stack options, spikes, proposed architecture) | 37.5 of the phase estimate | 24 Oct 2026 22:34 | 24 Oct 2026 23:03 (agent); stack gate pending | _Luke's review and gate to add_ | 0.49 (about 10 minutes of it lost to a mistake in the spike's set-up) | Subscription. 24.2k output, 10.4M cache-read, 36k cache-write; API-equivalent $2.86 |
 | Execution (per vertical slice) | | | | | | |
 | Decommissioning and evaluation | | | | | | |
 

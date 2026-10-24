@@ -1,0 +1,4 @@
+date: 2026-10-24T21:56:40Z
+cpu: 4 x Intel(R) Core(TM) i7-7600U CPU @ 2.80GHz
+python: Python 3.14.8
+load: oha, 10 connections, 60s after a 15 s warm-up; 4 server workers; uvicorn[standard]

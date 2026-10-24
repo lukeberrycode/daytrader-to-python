@@ -1,0 +1,3 @@
+<!doctype html><title>Home</title><h1>Welcome {{ user_id }}</h1>
+<p>Cash {{ balance }} · Holdings {{ count }} · Market value {{ market_value }} · Gain {{ gain }} ({{ gain_percent }}%)</p>
+<table>{% for h in holdings %}<tr><td>{{ h.symbol }}</td><td>{{ h.quantity }}</td><td>{{ h.value }}</td></tr>{% endfor %}</table>
