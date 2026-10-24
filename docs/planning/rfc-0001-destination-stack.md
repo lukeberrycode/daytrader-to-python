@@ -38,17 +38,22 @@ Spikes are in `rfc-0001/spikes/`, with their code and raw results. All ran on Lu
 
 One page shaped like DayTrader's home page: read an account and its 5 holdings with their quotes from Postgres, compute the figures with `Decimal` (HOME-1N, HOME-2N), render HTML. Each framework was written the way it would normally be used: Django's ORM and templates on gunicorn; FastAPI's async SQLAlchemy and Jinja2 on `uvicorn[standard]`. The legacy app's own home page was measured the same way. Load: `oha`, 10 connections, 60 seconds after a 15-second warm-up, one server at a time.
 
-| | 4 server workers | 8 server workers |
-|---|---|---|
-| Legacy (Java EE on Open Liberty, embedded Derby) | 1,208 req/s, p95 18 ms | 1,654 req/s, p95 12 ms |
-| Django | 458 req/s, p95 36 ms | 490 req/s, p95 33 ms |
-| FastAPI | 363 req/s, p95 57 ms | 477 req/s, p95 36 ms |
+Three runs at 8 server workers, all on the same code, on the evening of 24 October 2026 (`results/workers-8-run1` to `-run3`):
 
-- Both Python stacks reach roughly a third of the legacy app's throughput, with p95 latency 2 to 3 times higher. The legacy figures varied by about a third between runs, so treat the ratios as rough.
-- FastAPI's async model gives no advantage here: each request makes two short database queries, so there is little waiting for it to overlap. (A first FastAPI run without `uvicorn[standard]` managed 149 req/s; that set-up was unfair and is excluded.)
-- The comparison favours the legacy app in one way: its database runs inside the same process, while Postgres is a separate container. A production deployment would have the same separation.
+| Requests a second | Run 1 | Run 2 | Run 3 | Mean | p95 range |
+|---|---|---|---|---|---|
+| Legacy (Java EE on Open Liberty, embedded Derby) | 2,136 | 2,014 | 1,875 | 2,008 | 9–11 ms |
+| Django | 760 | 674 | 690 | 708 | 19–25 ms |
+| FastAPI | 619 | 477 | 582 | 559 | 27–41 ms |
 
-**Consequence: NFR-1 as written ("no worse than the legacy app on the same machine") is unlikely to be met by either Python stack without substantial optimisation.** That is a gate decision (below).
+- Both Python stacks reach about a third of the legacy app's throughput (Django 35%, FastAPI 28%), with p95 latency 2 to 4 times higher.
+- **This understates the gap.** The legacy home page is 8,231 bytes; the spikes' pages are about 435 bytes, so the legacy app does far more rendering per request.
+- Django was ahead of FastAPI in all three runs. FastAPI's async model gives no advantage here: each request makes two short database queries, so there's little waiting to overlap.
+- **Noise:** runs earlier the same evening, while other work was using the machine, gave much lower figures for all three (legacy 1,208 to 1,654, Django 458 to 586; `results/workers-4`, `results/workers-8`). Those runs also predate two fixes from the AI review: a check that the legacy login worked, and the spike's rounding (HOME-1N). They're kept for the record, not used. Compare only figures from the same run.
+- The legacy app's database runs inside its process, while Postgres is a separate container. A production deployment would have the same separation, so that difference stays.
+- A first FastAPI run without `uvicorn[standard]` (its fast event loop and HTTP parser) managed 149 req/s. That set-up was unfair, and is excluded.
+
+**Consequence: NFR-1 as written ("no worse than the legacy app on the same machine") is unlikely to be met by either Python stack, even with substantial optimisation.** That is a gate decision (below).
 
 ### 2. Money in JSON (MONEY-1N)
 
@@ -64,9 +69,12 @@ Can each option write `Decimal("25.90")` as the JSON number `25.90`? (`spikes/js
 
 Neither framework does it out of the box, so the API writes JSON with `simplejson` either way. This doesn't separate the options.
 
+`simplejson` writes a `Decimal` at whatever precision it has: `Decimal("25.9")` becomes `25.9`, and a 4-place quantity times a 2-place price has 6 places. So every amount is rounded to 2 places before encoding, in one function both the API and the WebSocket use (now part of MONEY-1N). The spike only tried values that already had 2 places; the AI review of this RFC pointed that out.
+
 ### 3. Security built in (AUTH-3N, AUTH-13N, AUTH-14N, ADMIN-1N)
 
-- **Django:** login (`ModelBackend.authenticate`) calls `check_password_with_timing_attack_mitigation` whether or not the user exists, which is AUTH-3N's timing rule (checked in Django 6.1.2's source). An Argon2 password hasher is built in (AUTH-13N). Sessions, CSRF protection, form validation and a permission system for the operator pages (ADMIN-1N) are built in.
+- **Django:** login (`ModelBackend.authenticate`) calls `check_password_with_timing_attack_mitigation` whether or not the user exists, which is AUTH-3N's timing rule. An Argon2 password hasher is built in (AUTH-13N); it needs `argon2-cffi` installed and the hasher set first in `PASSWORD_HASHERS`. Sessions, CSRF protection, form validation and a permission system for the operator pages (ADMIN-1N) are built in.
+- These are **hypotheses from reading Django 6.1.2's source**, not yet tested. The tests that will confirm them are already planned: AUTH-3N's timing test and AUTH-13N's stored-hash test (`requirements.md`).
 - **FastAPI:** none of these is built in. Sessions, CSRF, password hashing, the timing rule and operator permissions would be assembled from separate libraries and our own code, and every line of it reviewed.
 
 Most of the gate's fixes are security fixes (KF-3, KF-6). The less security code we write, the less there is to get wrong.
@@ -86,7 +94,7 @@ Most of the gate's fixes are security fixes (KF-3, KF-6). The less security code
 **Option 1: Django 6.1 on Python 3.14, with PostgreSQL 17.**
 
 - It meets the security requirements with built-in, widely reviewed code rather than code we'd write ourselves, and those requirements are most of what the gate changed.
-- It performed as well as FastAPI in the spike. Async would add complexity with no measured benefit for this workload.
+- It was faster than FastAPI in all three spike runs. Async would add complexity with no measured benefit for this workload.
 - Its admin and permission system covers the operator features (ADMIN-1N to ADMIN-3N, SEED-1N).
 - Its weakness is the WebSocket, which needs Channels and an ASGI server alongside gunicorn. That's one small part of the app (MARKET-1, MARKET-2).
 

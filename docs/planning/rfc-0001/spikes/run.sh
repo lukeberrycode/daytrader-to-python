@@ -3,7 +3,7 @@
 # Needs Docker and uv; the legacy app on 127.0.0.1:9080. Results: results/<name>.json
 set -euo pipefail
 cd "$(dirname "$0")"
-R="results/workers-${WORKERS:-4}"; mkdir -p "$R"
+R="results/workers-${WORKERS:-4}${RUN:+-run$RUN}"; mkdir -p "$R"
 OHA=ghcr.io/hatoo/oha@sha256:3ec3dbf549ea197793482d47a6324797411406bbf438c2fe8b91f244ec641a2f
 PG=postgres:17.6@sha256:00bc86618629af00d2937fdc5a5d63db3ff8450acf52f0636ec813c7f4902929
 DUR="${DUR:-60s}"; CONC="${CONC:-10}"; WORKERS="${WORKERS:-4}"
@@ -17,7 +17,7 @@ load() { # $1 name, $2 url, $3.. extra oha args
   local name=$1 url=$2; shift 2
   docker run --rm --network host "$OHA" -z 15s -c "$CONC" --no-tui "$@" "$url" >/dev/null  # warm-up
   docker run --rm --network host "$OHA" -z "$DUR" -c "$CONC" --no-tui --output-format json "$@" "$url" > "$R/$name.json"
-  python3 -c "import json;d=json.load(open('$R/$name.json'));s=d['summary'];p=d['latencyPercentiles'];assert s['successRate'] == 1, f\"$name: success rate {s['successRate']}\";print(f\"$name: {s['requestsPerSec']:.0f} req/s, success {s['successRate']:.3f}, p50 {p['p50']*1000:.1f} ms, p95 {p['p95']*1000:.1f} ms, p99 {p['p99']*1000:.1f} ms\")"
+  python3 -c "import json;d=json.load(open('$R/$name.json'));s=d['summary'];p=d['latencyPercentiles'];assert s['successRate'] == 1, f\"$name: success rate {s['successRate']}\";print(f\"$name: {s['requestsPerSec']:.0f} req/s, {s['sizePerRequest']:.0f} bytes/response, success {s['successRate']:.3f}, p50 {p['p50']*1000:.1f} ms, p95 {p['p95']*1000:.1f} ms, p99 {p['p99']*1000:.1f} ms\")"
 }
 
 DEPS=(--with django==6.1.2 --with "psycopg[binary]==3.3.6" --with gunicorn==26.2.0 --with fastapi==0.162.0
@@ -40,6 +40,9 @@ kill $SERVER; sleep 3
 
 # Legacy: the same page shape (its home page) for a logged-in seeded user.
 COOKIE=$(curl -s -c - -o /dev/null "http://127.0.0.1:9080/daytrader/app?action=login&uid=uid:42&passwd=xxx" | awk '/JSESSIONID/ {print "JSESSIONID=" $7}')
+[ -n "$COOKIE" ] || { echo "legacy login failed: no session cookie" >&2; exit 1; }
+curl -fs -H "Cookie: $COOKIE" "http://127.0.0.1:9080/daytrader/app?action=home" | grep -q "uid:42," \
+  || { echo "legacy login failed: the home page isn't uid:42's" >&2; exit 1; }
 load legacy "http://127.0.0.1:9080/daytrader/app?action=home" -H "Cookie: $COOKIE"
 
 docker rm -f spike-pg >/dev/null

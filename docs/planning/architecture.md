@@ -9,11 +9,11 @@
 | Language | Python 3.14 | |
 | Web framework | Django 6.1 (6.2 LTS when released) | |
 | Web UI | Server-rendered Django templates, one interface (S1) | AUTH-*, TRADE-*, HOME-*, PORT-1, QUOTE-3 |
-| Accounts | Django auth: sessions, CSRF, Argon2 password hashing, timing-safe login, permissions | AUTH-3N, AUTH-13N, ADMIN-1N |
+| Accounts | Django auth: sessions, CSRF, timing-safe login, permissions. Argon2 hashing needs `argon2-cffi` installed and the Argon2 hasher first in `PASSWORD_HASHERS` | AUTH-3N, AUTH-13N, ADMIN-1N |
 | Operator pages | Django views behind an operator permission; configuration stored in the database, updated field by field | ADMIN-1N to ADMIN-3N, SEED-1N |
-| REST API | Django views at the legacy paths (`/rest/quotes/...`), JSON written with `simplejson` (`use_decimal=True`) | QUOTE-1, QUOTE-2N, MONEY-1N |
+| REST API | Django views at the legacy paths (`/rest/quotes/...`), JSON written with `simplejson` (`use_decimal=True`). `simplejson` writes a `Decimal` at whatever precision it has, so one encoder function rounds every amount to 2 places first, and the WebSocket uses the same function | QUOTE-1, QUOTE-2N, MONEY-1N |
 | WebSocket | Django Channels consumer at the legacy path (`/marketsummary`), answering the same messages | MARKET-1, MARKET-2 |
-| Money | `Decimal` throughout; `DecimalField` → PostgreSQL `NUMERIC(14,2)`, quantities `NUMERIC(14,4)`; rounding only at the named points, half-up | MONEY-1N, TRADE-7N, HOME-2N, NFR-2 |
+| Money | `Decimal` throughout; `DecimalField` → PostgreSQL `NUMERIC(14,2)`, quantities `NUMERIC(14,4)`; rounding only at the named points (TRADE-7N, HOME-1N, HOME-2N, and before encoding to JSON), half-up | MONEY-1N, TRADE-7N, HOME-1N, HOME-2N, NFR-2 |
 | Database | PostgreSQL 17; orders partitioned by month once they grow (*later*: the size that triggers it) | ORDER-1N |
 | HTTP servers | gunicorn for pages and the API; an ASGI server for the WebSocket. Whether one ASGI server can serve everything fast enough is measured *later* | NFR-1 |
 | Logging | Structured logs with a filter that drops secrets, tested | AUTH-14N |

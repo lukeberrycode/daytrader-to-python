@@ -25,7 +25,7 @@ Each phase is estimated before it starts. "Luke" is his hands-on time: reviewing
 | Discovery, part 1: set-up, running locally, first documents and tests | (in the phase estimate) | 23 Oct 2026 14:36 | 23 Oct 2026 14:43 (file times) | 0.76 (see note) | 0.12 | Subscription. Build: 42.8k output, 5.78M cache-read, 131k cache-write; API-equivalent $3.06. Follow-up (see note): 35.5k output, 6.96M cache-read, 91k cache-write; API-equivalent $2.83. **Total API-equivalent $5.89** |
 | Discovery, part 2: remaining tests and the first gate | (in the phase estimate) | 24 Oct 2026 19:06 | 24 Oct 2026 20:00 (last push); gate passed 24 Oct 2026 | 0.50 (30 minutes: review and gate decisions, including KF-7) | 0.91 (includes a 5-minute load test and five rounds of AI review fixes) | Subscription. 104.1k output, 33.6M cache-read, 150k cache-write; API-equivalent $10.01 |
 | Planning | **71.2** (O 50.75, M 71.5, P 90.5; `estimation.md`, made 24 Oct 2026 before the phase started) | | | | | |
-| Planning: RFC-0001 (stack options, spikes, proposed architecture) | 37.5 of the phase estimate | 24 Oct 2026 22:34 | 24 Oct 2026 23:03 (agent); stack gate pending | _Luke's review and gate to add_ | 0.49 (about 10 minutes of it lost to a mistake in the spike's set-up) | Subscription. 24.2k output, 10.4M cache-read, 36k cache-write; API-equivalent $2.86 |
+| Planning: RFC-0001 (stack options, spikes, proposed architecture) | 37.5 of the phase estimate | 24 Oct 2026 22:34 | 24 Oct 2026 23:25 (agent, including the AI review's fixes and three repeat runs); stack gate pending | _Luke's review and gate to add_ | 0.85 (about 10 minutes lost to a mistake in the spike's set-up; most of the rest is load-test runs) | Subscription. 36.5k output, 18.2M cache-read, 53k cache-write; API-equivalent $4.79 |
 | Execution (per vertical slice) | | | | | | |
 | Decommissioning and evaluation | | | | | | |
 
@@ -57,4 +57,6 @@ Real API spend, from each run's job summary (`.github/workflows/ai-review.yml`).
 | #3 | 2 | 0.49 | Mostly the same points as run 1, already settled by the gate decisions; three gaps added (AUTH-8's test expects the full card number; no planned tests for the KF-1 setting or the KF-15 documentation) |
 | #3 | 3 | 0.35 | 7 findings: ORDER-1N and ADMIN-2N contradicted each other, ADMIN-2N untestable, HOME-2N imprecise, missing planned tests, login timing, stale lines. All fixed |
 
-Total real AI review spend: **$5.72** ($0.42 on #1, $4.03 on #2, $1.27 on #3).
+| #4 | 1 | 0.48 | 5 findings on RFC-0001: money in JSON needs rounding before encoding, the throughput evidence needed repeat runs and a page-size caveat, an unchecked legacy login, an unnamed rounding point, untested security claims. All fixed |
+
+Total real AI review spend: **$6.20** ($0.42 on #1, $4.03 on #2, $1.27 on #3, $0.48 on #4), plus runs on #3 after the last count; see each run's job summary.
