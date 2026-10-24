@@ -21,6 +21,7 @@ Both failing tests were corrected to describe what the app does, and each differ
 | 8 | A harness assumption: a successful login returns a page saying "Ready to Trade" (the code sets that status) | The home page doesn't show the status; three tests failed on first run | Tests failed; they now check for "Welcome <user>," |
 | 9 | Fractional trades are "rounded against the trader" (part 2's first version of TRADE-7) | Truncated toward zero: with a negative balance the rounding favours the trader | The AI review of the pull request questioned it; a test on the fixtures image confirmed it |
 | 10 | The scenario servlet test could send 40 requests in one session and expect some to fail | The servlet keeps its random user in the session, so all 40 went to one user; in CI that user existed and every request passed | The AI review predicted it; the next CI run failed that way. Each request now has no session |
+| 11 | ORDER-1's evidence: "Total Orders: 0" shows the order was deleted | Long run also hides orders on the account page, so the count alone couldn't tell deleted from hidden | The AI review pointed it out. A new test turns long run off after the alert: the order stays missing, so it was deleted, and KF-7 stands |
 
 Two predictions from the code were confirmed by tests written to check them: the home page breaks on a holding worth more than 2 decimal places (KF-13), and fractional trades lose a cent to the trader (KF-12).
 

@@ -10,7 +10,7 @@ The first phase of the method (`docs/method.md`), run on DayTrader 8.
 | What data does it own? | `data-inventory.md` |
 | Who are its users; their states, risks and journeys? | `users-states-journeys.md` |
 | What are the requirements, and how is each tested? | `requirements.md`, `tests/characterisation/` |
-| Does the old slice behave as the requirements say? | 60 characterisation test cases (plus one that checks the harness), passing against the legacy app and its fixtures image in CI |
+| Does the old slice behave as the requirements say? | 61 characterisation test cases (plus one that checks the harness), passing against the legacy app and its fixtures image in CI |
 | How does it perform? | `../../perf/baseline.md` (NFR-1) |
 | Keep or fix the odd behaviour? | `keep-or-fix.md` |
 | What did the agent get wrong? | `agent-errors.md` |

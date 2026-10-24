@@ -27,8 +27,8 @@ def restore_config(client):
 @pytest.mark.req("ADMIN-3")
 def test_a_config_update_turns_off_every_setting_it_omits(client, restore_config):
     # Keep-or-fix KF-17: the form's checkboxes are read as "off" when absent, so changing one
-    # setting from a script turns off long run, order alerts and the price streamer. With long
-    # run off, completed orders are kept (compare ORDER-1).
+    # setting from a script turns off long run, order alerts and the price streamer. With both
+    # long run and alerts off, a new order is counted on the account page.
     client.admin(action="updateConfig", MaxQuotes=client.config_fields()["MaxQuotes"])
     assert client.config_switches() == {
         "EnablePublishQuotePriceChange": False,
@@ -80,3 +80,29 @@ def test_the_scenario_servlet_fails_for_users_missing_from_the_database(client):
     statuses = [client.scenario() for _ in range(40)]
     assert 200 in statuses
     assert 500 in statuses
+
+
+@pytest.mark.req("ORDER-1")
+def test_the_order_alert_deletes_the_order_rather_than_hiding_it(client, restore_config):
+    # Long run also turns off the account page's "show all orders" query, so "Total Orders: 0"
+    # alone could mean hidden, not deleted. Separate the two: let the alert fire with long run on,
+    # then turn long run off (alerts still on). The first order stays missing; a new one counts.
+    user = LegacyClient()
+    try:
+        user.register(f"ct-{uuid.uuid4().hex[:12]}", "pw", "1000")
+        user.buy("s:7", "1")
+        assert "The following Order(s) have completed" in user.account_page()
+        max_quotes = client.config_fields()["MaxQuotes"]
+        client.admin(
+            action="updateConfig",
+            MaxQuotes=max_quotes,
+            DisplayOrderAlerts="on",
+            EnablePublishQuotePriceChange="on",
+        )
+        assert client.config_switches()["EnableLongRun"] is False
+        assert user.total_orders() == 0  # deleted, not hidden
+        user.buy("s:7", "1")
+        user.account_page()
+        assert user.total_orders() == 1  # the query works with long run off
+    finally:
+        user.close()
