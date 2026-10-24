@@ -23,7 +23,7 @@ Each phase is estimated before it starts. "Luke" is his hands-on time: reviewing
 |---|---|---|---|---|---|---|
 | **Discovery (parts 1 and 2)** | **119.3** (O 84.3, M 115.7, P 168.3; `estimation.md`) | 23 Oct 2026 14:36 | Gate passed 24 Oct 2026 | **1.18 + KF-7 decision** (Luke to confirm) | **1.03** | **API-equivalent $15.90** (subscription), plus **$4.45** real spend on AI review (below) |
 | Discovery, part 1: set-up, running locally, first documents and tests | (in the phase estimate) | 23 Oct 2026 14:36 | 23 Oct 2026 14:43 (file times) | 0.76 (see note) | 0.12 | Subscription. Build: 42.8k output, 5.78M cache-read, 131k cache-write; API-equivalent $3.06. Follow-up (see note): 35.5k output, 6.96M cache-read, 91k cache-write; API-equivalent $2.83. **Total API-equivalent $5.89** |
-| Discovery, part 2: remaining tests and the first gate | (in the phase estimate) | 24 Oct 2026 19:06 | 24 Oct 2026 20:00 (last push), gate pending | 0.42 + KF-7 decision (25 minutes of review and gate decisions, plus the KF-7 decision: Luke to confirm the final figure) | 0.91 (includes a 5-minute load test and five rounds of AI review fixes) | Subscription. 104.1k output, 33.6M cache-read, 150k cache-write; API-equivalent $10.01 |
+| Discovery, part 2: remaining tests and the first gate | (in the phase estimate) | 24 Oct 2026 19:06 | 24 Oct 2026 20:00 (last push); gate passed 24 Oct 2026 | 0.42 + KF-7 decision (25 minutes of review and gate decisions, plus the KF-7 decision: Luke to confirm the final figure) | 0.91 (includes a 5-minute load test and five rounds of AI review fixes) | Subscription. 104.1k output, 33.6M cache-read, 150k cache-write; API-equivalent $10.01 |
 | Planning | | | | | | |
 | Execution (per vertical slice) | | | | | | |
 | Decommissioning and evaluation | | | | | | |
@@ -50,4 +50,8 @@ Real API spend, from each run's job summary (`.github/workflows/ai-review.yml`).
 | #2 | 5 | 0.76 | 1 finding (posted inline; the summary comment was blocked): ORDER-1's evidence couldn't tell deleted orders from hidden ones. A new test shows they're deleted. Marked failed after 4 permission denials |
 | #2 | 6 | 0.00 | Failed before any model ran (0.6 seconds, no tokens); the log gives no reason. For Luke to check in the Anthropic Console (spend limit or credit balance) |
 
-Total real AI review spend: **$4.45** ($0.42 on #1, $4.03 on #2).
+| #3 | 1 | 0.43 | 8 findings on the gate record, including a wrong claim about load-test orders (KF-7). Fixed, or settled by Luke with Claude's recommendations |
+| #3 | 2 | 0.49 | Mostly the same points as run 1, already settled by the gate decisions; three gaps added (AUTH-8's test expects the full card number; no planned tests for the KF-1 setting or the KF-15 documentation) |
+| #3 | 3 | 0.35 | 7 findings: ORDER-1N and ADMIN-2N contradicted each other, ADMIN-2N untestable, HOME-2N imprecise, missing planned tests, login timing, stale lines. All fixed |
+
+Total real AI review spend: **$5.72** ($0.42 on #1, $4.03 on #2, $1.27 on #3).
