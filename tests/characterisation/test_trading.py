@@ -174,7 +174,7 @@ def test_fractional_and_exponent_quantities_are_accepted(client, new_user, quant
 
 @pytest.mark.req("TRADE-7")
 @pytest.mark.parametrize("quantity", ["0.1", "0.3", "0.7", "0.15"])
-def test_a_fractional_trade_is_rounded_against_the_trader(client, new_user, quantity):
+def test_a_fractional_purchase_is_truncated_toward_zero(client, new_user, quantity):
     # Keep-or-fix KF-12: the quantity is a Java double, so 0.1 is really
     # 0.1000000000000000055..., and the database truncates the new balance to 2 places.
     # The trader pays up to a cent more than half-up rounding would charge.

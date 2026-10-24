@@ -3,7 +3,8 @@
 # Stage 2 follows the sample's own Dockerfile.
 # The "fixtures" target is the same app with a few prices changed in its database before it starts,
 # so rules the shipped data never reaches can be tested (see legacy/docker/fixtures.sql). The code
-# is untouched. The default target, built when no --target is given, is the unmodified app.
+# is untouched. ij exits 0 even when a statement fails, so the build checks its output instead.
+# The default target, built when no --target is given, is the unmodified app.
 # Both base images are pinned by digest: the legacy app is the test oracle, so its server and JDK
 # change only in a deliberate pull request. The tag says what the digest is; the digest decides.
 FROM maven:3.9.16-eclipse-temurin-11@sha256:7bb84a451705605a47d24eb844d4d9ab03e33e131a507db76aafe25db3907f64 AS build
@@ -26,7 +27,9 @@ COPY --chown=1001:0 --from=build /tools/derbytools-10.14.2.0.jar /tmp/derbytools
 COPY --chown=1001:0 docker/fixtures.sql /tmp/fixtures.sql
 RUN java -cp /opt/ol/wlp/usr/shared/resources/DerbyLibs/derby-10.14.2.0.jar:/tmp/derbytools.jar \
       -Dderby.stream.error.file=/tmp/derby.log -Dij.database="jdbc:derby:/opt/ol/wlp/usr/shared/resources/data/tradedb;user=db_username;password=db_password" \
-      org.apache.derby.tools.ij /tmp/fixtures.sql \
- && rm /tmp/derbytools.jar /tmp/fixtures.sql /tmp/derby.log
+      org.apache.derby.tools.ij /tmp/fixtures.sql > /tmp/ij.out \
+ && cat /tmp/ij.out \
+ && ! grep -E "^(ERROR|WARNING)" /tmp/ij.out \
+ && rm /tmp/derbytools.jar /tmp/fixtures.sql /tmp/derby.log /tmp/ij.out
 
 FROM legacy

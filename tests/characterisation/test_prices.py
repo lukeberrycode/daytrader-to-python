@@ -4,6 +4,7 @@ legacy/docker/fixtures.sql seeds a few prices before the app starts (s:994 to s:
 Each test's trade changes the seeded price, so each rule can be tested once per container.
 """
 
+import os
 import uuid
 from decimal import Decimal
 
@@ -15,11 +16,14 @@ def _user_id() -> str:
 
 
 def _seeded(c, symbol: str, price: str) -> None:
-    """Skip, rather than fail, on a fixtures container whose seeded price has been traded."""
-    if c.quote(symbol).price != Decimal(price):
-        pytest.skip(
-            f"{symbol} is no longer at its seeded {price}: start a fresh fixtures container"
-        )
+    """Skip on a fixtures container whose seeded price has been traded. In CI (FIXTURES_STRICT),
+    the container is always fresh, so a wrong price means the seeding failed: fail instead."""
+    actual = c.quote(symbol).price
+    if actual != Decimal(price):
+        message = f"{symbol} is at {actual}, not its seeded {price}"
+        if os.environ.get("FIXTURES_STRICT"):
+            pytest.fail(f"{message}: the fixtures image wasn't seeded")
+        pytest.skip(f"{message}: start a fresh fixtures container")
 
 
 @pytest.mark.req("PRICE-2")

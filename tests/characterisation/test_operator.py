@@ -67,7 +67,8 @@ def test_reset_removes_ru_users_and_zeroes_seeded_login_counts(client):
 @pytest.mark.req("SCEN-1")
 def test_the_scenario_servlet_fails_for_users_missing_from_the_database(client):
     # Keep-or-fix KF-9: the servlet picks users up to MAX_USERS (1000, from the image) but the
-    # database has uid:0 to uid:499, so a large share of requests are HTTP 500.
+    # database has uid:0 to uid:499, so a large share of requests are HTTP 500. Each request has
+    # no session, so each logs in as a new random user; about 4 in 10 fail.
     assert client.config_fields()["MaxUsers"] == "1000"
     client.login("uid:499", "xxx")
     client.logout()

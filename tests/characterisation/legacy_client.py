@@ -131,8 +131,9 @@ class LegacyClient:
         return _text(response.text)
 
     def scenario(self) -> int:
-        """One request to the benchmark scenario servlet; returns its HTTP status."""
-        return self._http.get("/scenario").status_code
+        """One request to the scenario servlet, with no session, so it logs in as a new random
+        user each time (it keeps its user in the session). Returns the HTTP status."""
+        return httpx.get(f"{self.base_url}/scenario", timeout=30).status_code
 
     def register(
         self, user_id: str, password: str, opening_balance: str, confirm: str | None = None
@@ -237,6 +238,8 @@ class LegacyClient:
             )
         ]
         total = re.search(rf"Total \$ {MONEY} \$ {MONEY} \$ {MONEY} \( ([+-]?[\d.]+)% \)", page)
+        if total is None:
+            raise AssertionError(f"No totals row on the portfolio page: {page[:500]}")
         return Portfolio(rows, *(Decimal(v) for v in total.groups()))
 
     def home(self) -> str:

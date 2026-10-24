@@ -55,6 +55,7 @@ jobs:
       - name: Characterisation tests (legacy)
         env:
           FIXTURES_URL: http://localhost:9081/daytrader
+          FIXTURES_STRICT: "1"
         run: uv run pytest tests/characterisation
       - name: Legacy server logs
         if: failure()
