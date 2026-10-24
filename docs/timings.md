@@ -46,3 +46,4 @@ Real API spend, from each run's job summary (`.github/workflows/ai-review.yml`).
 | #2 | 1 | 0.78 | 7 findings, all fixed in the same pull request; marked failed for taking 29 turns against a cap of 20 (cap raised to 40) |
 | #2 | 2 | 0.83 | 4 groups of findings: TRADE-7 overstated (balances truncate toward zero), requirements claiming more than their tests showed, test isolation, docs. All fixed |
 | #2 | 3 | 0.74 | 6 findings, including a flaky SCEN-1 test that CI then failed on, and fixture errors that could pass silently. All fixed |
+| #2 | 4 | 0.92 | 6 findings: two tests that couldn't fail (ADMIN-2, HOME-2), two requirements broader than their tests (AUTH-7, MARKET-2), two wording. All fixed |

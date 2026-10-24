@@ -53,8 +53,11 @@ def test_reset_removes_ru_users_and_zeroes_seeded_login_counts(client):
     kept = f"ct-{uuid.uuid4().hex[:12]}"
     for user_id in (removed, kept):
         other = LegacyClient()
-        other.register(user_id, "pw", "1000")
+        assert f"Welcome {user_id}," in other.register(user_id, "pw", "1000")
         other.close()
+    client.login("uid:3", "xxx")
+    assert client.login_counts()[0] >= 1
+    client.logout()
     client.admin(action="resetTrade")
     with pytest.raises(httpx.HTTPStatusError):
         client.login(removed, "pw")

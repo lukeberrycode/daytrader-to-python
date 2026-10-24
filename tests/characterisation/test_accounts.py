@@ -35,9 +35,20 @@ def test_login_and_logout_are_counted(client, new_user):
 
 
 @pytest.mark.req("AUTH-7")
-def test_pages_after_login_need_a_session(client):
-    page = client.home()
-    assert "User Not Logged in" in page
+@pytest.mark.parametrize(
+    "params",
+    [
+        {"action": "home"},
+        {"action": "account"},
+        {"action": "portfolio"},
+        {"action": "quotes", "symbols": "s:1"},
+        {"action": "buy", "symbol": "s:1", "quantity": "1"},
+        {"action": "sell", "holdingID": "1"},
+        {"action": "update_profile", "password": "x", "cpassword": "x"},
+    ],
+)
+def test_pages_after_login_need_a_session(client, params):
+    assert "User Not Logged in" in client._app(**params)
 
 
 @pytest.mark.req("AUTH-9")

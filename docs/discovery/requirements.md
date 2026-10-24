@@ -47,7 +47,7 @@ The 13 features counted in `docs/estimation.md` (F), from the app's documentatio
 | AUTH-4 | Any opening balance is accepted, including negative (KF-2) | Medium | `doRegister` | `test_registration_accepts_a_negative_opening_balance` | Confirmed |
 | AUTH-5 | Registering an existing user ID fails with "Registration operation failed" | Medium | `TradeSLSBBean.register` | `test_registering_an_existing_user_id_fails` | Confirmed |
 | AUTH-6 | Login and logout are counted on the account; registration counts as the first login | Low | `AccountDataBean` | `test_login_and_logout_are_counted` | Confirmed |
-| AUTH-7 | Pages other than welcome, login and register need a session; without one the welcome page shows "User Not Logged in" | Medium | `TradeAppServlet` | `test_pages_after_login_need_a_session` | Confirmed |
+| AUTH-7 | Pages other than welcome, login and register need a session; without one the welcome page shows "User Not Logged in". Tested for home, account, portfolio, quotes, buy, sell and profile update | Medium | `TradeAppServlet` | `test_pages_after_login_need_a_session` | Confirmed |
 | AUTH-8 | A user can update password, name, address, card and email (all five checked); the new password works at the next login | Medium | `doAccountUpdate` | `test_profile_update_changes_the_profile_and_the_password` | Confirmed |
 | AUTH-9 | An unknown user ID is an HTTP 500, like a wrong password (KF-3) | Medium | `TradeSLSBBean.login` | `test_an_unknown_user_id_is_a_server_error` | Confirmed |
 | AUTH-10 | A profile update whose two passwords differ changes nothing | Medium | `doAccountUpdate` | `test_profile_update_with_unmatched_passwords_changes_nothing` | Confirmed |
@@ -63,7 +63,7 @@ The 13 features counted in `docs/estimation.md` (F), from the app's documentatio
 | QUOTE-3 | The quotes page shows each symbol with its company, volume, price range, open, current price and change; the gain percentage follows HOME-2 | Low | `quote.jsp` | `test_the_quotes_page_shows_each_symbol_with_its_price` | Confirmed |
 | QUOTE-4 | A quote's low and high stay at the opening price, however the price moves (KF-14) | Low | `updateQuotePriceVolume` | `test_low_and_high_never_move_from_the_opening_price` | Corrected (the glossary says the session's low and high) |
 | MARKET-1 | The market index (TSIA) is the mean price of every stock, rounded to 2 places (half-up in the code; the test can't produce a tie to tell half-up from half-even). It's recalculated at most every 20 seconds (from the code, `marketSummaryInterval`) (KF-15) | Low | `MarketSummarySingleton` | `test_the_market_index_is_the_mean_price_of_every_stock` | Corrected (the glossary says the top 20 stocks) |
-| MARKET-2 | The top 5 gainers and losers are the stocks with the largest rise and fall from their opening price, in money, not percent. Total volume is sent as a binary float, e.g. 244711.84999999998 (seen by hand; KF-4) | Low | same | `test_top_gainers_and_losers_are_ranked_by_change_in_price` | Confirmed |
+| MARKET-2 | The top 5 gainers and losers are the stocks with the largest rise and fall from their opening price, in money, not percent. Total volume is sent as a binary float, e.g. 244711.84999999998 (KF-4) | Low | same | `test_top_gainers_and_losers_are_ranked_by_change_in_price` | Confirmed (total volume: by hand) |
 
 ## Trading (states T5–T7): highest risk
 
@@ -107,4 +107,4 @@ The account page has no gain figure. ACCT-1, which said it had, was wrong and is
 
 ## Coverage
 
-46 tests (54 test cases with parameters) confirm or correct 37 of the 38 functional requirements. ADMIN-4 is checked by hand. One more test checks the harness itself. Of the non-functional requirements, NFR-1 has a measured baseline, NFR-3 is met by the set-up, and NFR-2 waits on the gate.
+46 tests (60 test cases with parameters) confirm or correct 37 of the 38 functional requirements. ADMIN-4 is checked by hand. One more test checks the harness itself. Of the non-functional requirements, NFR-1 has a measured baseline, NFR-3 is met by the set-up, and NFR-2 waits on the gate.

@@ -223,7 +223,9 @@ def test_gain_percentages_are_rounded_to_whole_percent(client, new_user):
     summary = client.home_summary()
     ratio = (summary.cash_and_holdings / summary.opening_balance).quantize(CENT, ROUND_HALF_UP)
     assert summary.gain_percent == (ratio - 1) * 100
-    assert summary.gain_percent == summary.gain_percent.to_integral_value()
+    # The symptom: two fees are a real loss of 0.05%, shown as 0%.
+    assert summary.gain == -2 * ORDER_FEE
+    assert summary.gain_percent == 0
 
 
 @pytest.mark.req("HOME-3")
