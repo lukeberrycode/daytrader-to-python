@@ -17,4 +17,5 @@ Migration of DayTrader 8 (Java EE, in the `legacy/daytrader8` submodule) to Pyth
 ## Commands
 
 - `uv run ruff check`, `uv run ruff format`.
-- `uv run pytest tests/characterisation` needs the legacy app running (see the README).
+- `uv run pytest tests/characterisation` needs the legacy app running (see the README); PRICE-2 and PRICE-3 also need the fixtures image (`FIXTURES_URL`).
+- `perf/run-baseline.sh` runs the NFR-1 load baseline. Nothing else may use the legacy app while it runs.

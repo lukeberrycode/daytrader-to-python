@@ -12,7 +12,7 @@ The method is in [`docs/method.md`](docs/method.md). In short:
 
 | Phase | Status |
 |---|---|
-| Discovery | Part 1 done: [`docs/discovery/`](docs/discovery/). First gate not yet passed |
+| Discovery | Done: [`docs/discovery/`](docs/discovery/). Waiting for the first gate |
 | Planning | Not started |
 | Execution | Not started |
 | Evaluation | Not started |
@@ -37,6 +37,20 @@ Then open http://localhost:9080/daytrader (log in as `uid:0`, password `xxx`). T
 uv sync
 uv run pytest tests/characterisation
 ```
+
+Two price rules (PRICE-2, PRICE-3) need the `fixtures` image, the same app with two prices seeded. Without it those two tests are skipped:
+
+```sh
+docker build -t daytrader8-legacy-fixtures --target fixtures -f legacy/docker/Dockerfile legacy
+docker run -d --name fixtures -p 127.0.0.1:9081:9080 daytrader8-legacy-fixtures
+FIXTURES_URL=http://localhost:9081/daytrader uv run pytest tests/characterisation
+```
+
+Each fixtures container can run those two tests once: their trades change the seeded prices.
+
+## Performance baseline
+
+`perf/run-baseline.sh [threads] [seconds]` runs DayTrader's own JMeter workload against the legacy app on port 9080, in a container. Results: `perf/baseline.md`.
 
 Each test is marked with the requirement it checks, e.g. `@pytest.mark.req("TRADE-1")`. The tests talk to the app only through `tests/characterisation/legacy_client.py`, so a second client with the same methods will run them against the new slice. Every pull request runs them in CI against a freshly built legacy app.
 

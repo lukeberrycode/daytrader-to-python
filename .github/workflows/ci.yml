@@ -2,6 +2,7 @@
 # "checks": lint and format. Unit tests join it when the new slice has code.
 # "characterisation": builds the unmodified DayTrader 8 from the pinned submodule, starts it, and
 # runs the characterisation tests against it. Later, the same tests run against the new slice.
+# A second container runs the "fixtures" image (seeded prices) for PRICE-2 and PRICE-3.
 name: CI
 
 on:
@@ -46,8 +47,17 @@ jobs:
         run: |
           docker run -d --name legacy -p 127.0.0.1:9080:9080 daytrader8-legacy
           scripts/wait-for-legacy.sh
+      - name: Build and start the fixtures image
+        run: |
+          docker build -t daytrader8-legacy-fixtures --target fixtures -f legacy/docker/Dockerfile legacy
+          docker run -d --name fixtures -p 127.0.0.1:9081:9080 daytrader8-legacy-fixtures
+          LEGACY_URL=http://localhost:9081/daytrader scripts/wait-for-legacy.sh
       - name: Characterisation tests (legacy)
+        env:
+          FIXTURES_URL: http://localhost:9081/daytrader
         run: uv run pytest tests/characterisation
-      - name: Legacy server log
+      - name: Legacy server logs
         if: failure()
-        run: docker logs legacy
+        run: |
+          docker logs legacy
+          docker logs fixtures
