@@ -5,8 +5,8 @@ One embedded Derby database, `tradedb`, owned entirely by the app. No other syst
 | Table | Holds | Key | Money columns | Notes |
 |---|---|---|---|---|
 | `ACCOUNTPROFILEEJB` | User ID, password, full name, address, email, credit card | `USERID` | – | **Password and card number in plain text** (KF-3) |
-| `ACCOUNTEJB` | Balance, opening balance, login and logout counts, created and last login | `ACCOUNTID` | `BALANCE`, `OPENBALANCE` DECIMAL(14,2) | One account per profile |
-| `QUOTEEJB` | Symbol, company, price, open, low, high, change, volume | `SYMBOL` | `PRICE`, `OPEN1`, `LOW`, `HIGH` DECIMAL(14,2) | `CHANGE1` and `VOLUME` are DOUBLE (KF-4) |
+| `ACCOUNTEJB` | Balance, opening balance, login and logout counts, created and last login | `ACCOUNTID` | `BALANCE`, `OPENBALANCE` DECIMAL(14,2) | One account per profile. Saving a balance with more than 2 decimal places truncates it (KF-12) |
+| `QUOTEEJB` | Symbol, company, price, open, low, high, change, volume | `SYMBOL` | `PRICE`, `OPEN1`, `LOW`, `HIGH` DECIMAL(14,2) | `CHANGE1` and `VOLUME` are DOUBLE (KF-4). `LOW` and `HIGH` never change after seeding (KF-14) |
 | `HOLDINGEJB` | Shares held: quantity, purchase price and date | `HOLDINGID` | `PURCHASEPRICE` DECIMAL(14,2) | `QUANTITY` is DOUBLE. A purchase date of 1970-01-01 marks a holding being sold |
 | `ORDEREJB` | Orders: type, status, quantity, price, fee, open and completion dates | `ORDERID` | `PRICE`, `ORDERFEE` DECIMAL(14,2) | Status: open, processing, closed, completed, alertcompleted, cancelled. With the default "long run" setting, closed orders are **deleted** once shown in the order alert (KF-7) |
 | `KEYGENEJB` | Next key per table | `KEYNAME` | – | Keys handed out in blocks of 1,000 |

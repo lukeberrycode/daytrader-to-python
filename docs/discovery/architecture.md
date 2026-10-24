@@ -20,6 +20,8 @@ Size: 141 Java files (about 19,900 lines), 38 JSP and XHTML pages. One existing 
 - Maven (`pom.xml`), Liberty Maven plugin 3.3-M4, Java EE API 8.0. No unit or integration tests.
 - JMeter workloads in `jmeter_files/` (with and without WebSockets, JSP and JSF variants).
 - Here: `legacy/docker/Dockerfile` builds the WAR in a Maven container and runs it on Open Liberty, unchanged. CI does the same before running the characterisation tests.
+- Its `fixtures` target is the same app with a few prices set in the database before it starts (`legacy/docker/fixtures.sql`), for rules the shipped data never reaches or never pins down (PRICE-2, PRICE-3, and some TRADE-7 and HOME-3 cases). The code is untouched.
+- `perf/` runs DayTrader's own JMeter workload against the legacy app for the NFR-1 baseline (`perf/baseline.md`).
 
 ## Diagram
 

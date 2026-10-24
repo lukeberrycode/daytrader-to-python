@@ -1,0 +1,6 @@
+date: 2026-10-24T18:24:12Z
+threads: 10; measured seconds: 180; warm-up seconds: 60; think time: 0
+legacy image: sha256:7b761330d54024363295fd833b28f862f488e07d8c4ac41546be06578cc5790a
+cpu: 4 x Intel(R) Core(TM) i7-7600U CPU @ 2.80GHz
+memory: 19 GB
+jmeter: 5.6.3; app and load generator on the same machine

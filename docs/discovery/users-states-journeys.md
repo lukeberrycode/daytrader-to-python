@@ -33,6 +33,7 @@ No upstream services: the app calls nothing outside itself.
 | O1 | Viewing configuration | Low |
 | O2 | Changing runtime, order processing or interface mode | Medium: changes behaviour for every user |
 | O3 | Resetting trade data / rebuilding the database | **High: data loss, no login needed** (KF-6) |
+| O4 | Driving load through the scenario servlet (`/scenario`) | Low: benchmark only (KF-9) |
 
 ## Risk ranking (sets the order and depth of work)
 

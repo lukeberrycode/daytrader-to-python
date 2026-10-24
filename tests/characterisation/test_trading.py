@@ -7,7 +7,7 @@ and check relationships, never fixed prices.
 """
 
 import uuid
-from decimal import Decimal
+from decimal import ROUND_DOWN, ROUND_HALF_UP, Decimal
 
 import httpx
 import pytest
@@ -142,3 +142,120 @@ def test_a_completed_order_is_shown_once_as_an_alert_then_deleted(client, new_us
     assert str(order.order_id) in first
     assert client.total_orders() == 0
     assert "The following Order(s) have completed" not in client.account_page()
+
+
+@pytest.mark.req("TRADE-2")
+def test_a_holding_records_the_price_before_the_buy(client, new_user):
+    price = client.quote(SYMBOL).price
+    client.buy(SYMBOL, "2")
+    (row,) = client.portfolio().rows
+    assert (row.symbol, row.quantity, row.purchase_price) == (SYMBOL, Decimal("2.0"), price)
+
+
+@pytest.mark.req("TRADE-6")
+@pytest.mark.parametrize("quantity", ["-5", "0", "abc", ""])
+def test_an_invalid_quantity_is_a_server_error_and_moves_no_money(client, new_user, quantity):
+    # Keep-or-fix KF-16: no message on the page, just an HTTP 500.
+    before = client.cash_balance()
+    with pytest.raises(httpx.HTTPStatusError) as error:
+        client.buy(SYMBOL, quantity)
+    assert error.value.response.status_code == 500
+    assert client.cash_balance() == before
+    assert client.holding_ids() == []
+
+
+@pytest.mark.req("TRADE-6")
+@pytest.mark.parametrize("quantity", ["0.1", "2.5", "1e3"])
+def test_fractional_and_exponent_quantities_are_accepted(client, new_user, quantity):
+    order = client.buy(SYMBOL, quantity)
+    assert order.status == "closed"
+    assert order.quantity == Decimal(quantity)
+
+
+@pytest.mark.req("TRADE-7")
+@pytest.mark.parametrize("quantity", ["0.1", "0.3", "0.7", "0.15"])
+def test_a_fractional_purchase_is_truncated_toward_zero(client, new_user, quantity):
+    # Keep-or-fix KF-12: the quantity is a Java double, so 0.1 is really
+    # 0.1000000000000000055..., and the database truncates the new balance to 2 places.
+    # The trader pays up to a cent more than half-up rounding would charge.
+    before = client.cash_balance()
+    price = client.quote(SYMBOL).price
+    client.buy(SYMBOL, quantity)
+    # float() here models the legacy app's Java double on purpose; it is the behaviour under test.
+    # CLAUDE.md's no-float rule is for the new slice. A seeded-price test pins this down exactly
+    # (test_prices.py).
+    exact = Decimal(float(quantity)) * price + ORDER_FEE  # what Java's new BigDecimal(double) does
+    assert client.cash_balance() == (before - exact).quantize(CENT, rounding=ROUND_DOWN)
+
+
+@pytest.mark.req("TRADE-7")
+def test_a_fractional_sale_is_truncated_toward_zero_too(client, new_user):
+    client.buy(SYMBOL, "0.3")
+    (holding_id,) = client.holding_ids()
+    before = client.cash_balance()
+    price = client.quote(SYMBOL).price
+    client.sell(holding_id)
+    exact = before + Decimal(float("0.3")) * price - ORDER_FEE  # float() models Java's double
+    assert client.cash_balance() == exact.quantize(CENT, rounding=ROUND_DOWN)
+
+
+@pytest.mark.req("HOME-1")
+def test_home_page_values_holdings_at_purchase_cost(client, new_user):
+    # Keep-or-fix KF-11: "total of holdings" is the purchase cost, not the market value the
+    # glossary describes, so "current gain" only ever reflects fees.
+    client.buy(SYMBOL, "2")
+    client.buy("s:8", "3")
+    summary = client.home_summary()
+    basis = sum(row.basis for row in client.portfolio().rows)
+    assert summary.holdings == 2
+    assert summary.holdings_total == basis
+    assert summary.cash_and_holdings == summary.cash + basis
+    assert summary.gain == summary.cash_and_holdings - summary.opening_balance
+    assert summary.gain == -2 * ORDER_FEE
+
+
+@pytest.mark.req("HOME-2")
+def test_gain_percentages_are_rounded_to_whole_percent(client, new_user):
+    # Keep-or-fix KF-10: the ratio is rounded to 2 decimal places before multiplying by 100,
+    # so -0.05% shows as +0.00%.
+    client.buy(SYMBOL, "1")
+    client.buy("s:8", "1")
+    summary = client.home_summary()
+    ratio = (summary.cash_and_holdings / summary.opening_balance).quantize(CENT, ROUND_HALF_UP)
+    assert summary.gain_percent == (ratio - 1) * 100
+    # The symptom: two fees are a real loss of 0.05%, shown as 0%.
+    assert summary.gain == -2 * ORDER_FEE
+    assert summary.gain_percent == 0
+
+
+@pytest.mark.req("HOME-3")
+def test_a_holding_worth_more_than_two_decimal_places_breaks_the_home_page(client, new_user):
+    # Keep-or-fix KF-13: price x quantity is set to 2 places with no rounding mode, which throws.
+    # The quantity is a double, so 0.1 has dozens of decimal places and this fails at any price.
+    client.buy(SYMBOL, "0.1")
+    assert client.status(action="home") == 500
+    assert client.status(action="portfolio") == 200
+
+
+@pytest.mark.req("PORT-1")
+def test_portfolio_values_each_holding_at_the_current_price(client, new_user):
+    client.buy(SYMBOL, "2")
+    client.buy("s:8", "3")
+    portfolio = client.portfolio()
+    for row in portfolio.rows:
+        assert row.current_price == client.quote(row.symbol).price
+        assert row.basis == row.quantity * row.purchase_price
+        assert row.market_value == row.quantity * row.current_price
+        assert row.gain == row.market_value - row.basis
+    assert portfolio.total_basis == sum(r.basis for r in portfolio.rows)
+    assert portfolio.total_market_value == sum(r.market_value for r in portfolio.rows)
+    assert portfolio.total_gain == portfolio.total_market_value - portfolio.total_basis
+    ratio = (portfolio.total_market_value / portfolio.total_basis).quantize(CENT, ROUND_HALF_UP)
+    assert portfolio.total_gain_percent == (ratio - 1) * 100
+
+
+@pytest.mark.req("PRICE-1")
+def test_a_trade_adds_its_quantity_to_the_volume(client, new_user):
+    before = client.quote(SYMBOL).volume
+    client.buy(SYMBOL, "3")
+    assert client.quote(SYMBOL).volume == before + 3
