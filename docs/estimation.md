@@ -72,9 +72,38 @@ Not counted: the web primitives, described in the manual as a suite of benchmark
 
 **PERT estimate: (84.3 + 4 × 115.7 + 168.3) / 6 = 119.3 hours**, with a standard deviation of (168.3 − 84.3) / 6 = 14.0 hours. That's about 3.2 weeks at 37.5 hours a week.
 
+## Planning phase (Luke, 24 October 2026, before Planning started)
+
+### The method
+
+Luke's estimate of each Planning step in `method.md` for an engineer, or engineers, working without AI, with optimistic (O), most likely (M) and pessimistic (P) values combined with PERT, as in Discovery. Unlike Discovery's, these are per-step judgements rather than a formula with counted inputs (see principle 1); the per-step reasons are recorded so they can be checked against the actual times.
+
+| Step (`method.md`) | Luke's estimate and reasoning |
+|---|---|
+| What technologies to use in the new slice? (the RFC, its feedback, and the architecture documents for the decision) | **1 week of engineering time**: not one engineer for a week, but several spread across writing the RFC, taking in feedback and documenting the decision. A single figure, so O = M = P |
+| [GATE] Is the destination stack approved? | Not estimated: a person's decision, measured as Luke's time |
+| How does the data move? (the data migration plan) | O 2 hours, M 4 hours, P 8 hours |
+| Plan the cut-over (mechanism, success criteria, rollback) | O 0.5 days, M 2 days, P 3 days. "Really depends on the technology", so the spread is wide until the RFC decides |
+| What are the vertical slices? (in delivery order, with each slice's requirements and dependency order) | O 1 day, M 2 days, P 3 days |
+| [GATE] Are the slices, their order and the cut-over plan approved? | Not estimated, as above |
+
+Days and weeks are converted at 7.5 hours a day and 37.5 hours a week, as in Discovery. "1 week of engineering time" is read as 37.5 hours of effort in total, however many engineers share it.
+
+### Calculation
+
+| Step | O (h) | M (h) | P (h) | PERT (h) |
+|---|---|---|---|---|
+| RFC and architecture documents | 37.5 | 37.5 | 37.5 | 37.5 |
+| Data migration plan | 2.0 | 4.0 | 8.0 | 4.3 |
+| Cut-over plan | 3.75 | 15.0 | 22.5 | 14.4 |
+| Vertical slices | 7.5 | 15.0 | 22.5 | 15.0 |
+| **Total** | **50.75** | **71.5** | **90.5** | **71.2** |
+
+**PERT estimate: (50.75 + 4 × 71.5 + 90.5) / 6 = 71.2 hours**, with a standard deviation of (90.5 − 50.75) / 6 = 6.6 hours, the same convention as Discovery. That's about 1.9 weeks at 37.5 hours a week.
+
 ## Later phases
 
-Each later phase gets its own method, agreed before the phase starts and recorded here, in the same spirit: a stated formula with countable inputs.
+Execution and Evaluation each get their own method, agreed before the phase starts and recorded here.
 
 ## Whole migration
 

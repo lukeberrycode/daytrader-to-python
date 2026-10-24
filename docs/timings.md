@@ -24,7 +24,7 @@ Each phase is estimated before it starts. "Luke" is his hands-on time: reviewing
 | **Discovery (parts 1 and 2)** | **119.3** (O 84.3, M 115.7, P 168.3; `estimation.md`) | 23 Oct 2026 14:36 | Gate passed 24 Oct 2026 | **1.26** (0.76 in part 1, mostly the one-off estimation method; 0.50 in part 2: review and gate) | **1.03** | **API-equivalent $15.90** (subscription), plus **$4.45** real spend on AI review (below) |
 | Discovery, part 1: set-up, running locally, first documents and tests | (in the phase estimate) | 23 Oct 2026 14:36 | 23 Oct 2026 14:43 (file times) | 0.76 (see note) | 0.12 | Subscription. Build: 42.8k output, 5.78M cache-read, 131k cache-write; API-equivalent $3.06. Follow-up (see note): 35.5k output, 6.96M cache-read, 91k cache-write; API-equivalent $2.83. **Total API-equivalent $5.89** |
 | Discovery, part 2: remaining tests and the first gate | (in the phase estimate) | 24 Oct 2026 19:06 | 24 Oct 2026 20:00 (last push); gate passed 24 Oct 2026 | 0.50 (30 minutes: review and gate decisions, including KF-7) | 0.91 (includes a 5-minute load test and five rounds of AI review fixes) | Subscription. 104.1k output, 33.6M cache-read, 150k cache-write; API-equivalent $10.01 |
-| Planning | | | | | | |
+| Planning | **71.2** (O 50.75, M 71.5, P 90.5; `estimation.md`, made 24 Oct 2026 before the phase started) | | | | | |
 | Execution (per vertical slice) | | | | | | |
 | Decommissioning and evaluation | | | | | | |
 
